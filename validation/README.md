@@ -5,8 +5,12 @@
 Get command: (EARLY)
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib@validation#name=datalake-validation;branch=package/validation
+gpip get github.com/Webjet/datalake-pylib@validation#name=datalake-validation\;branch=package.validation
 ```
+
+On requirements:
+
+github.com/Webjet/datalake-pylib@validation#name=datalake-validation;branch=package.validation
 
 ### Return schemas
 
