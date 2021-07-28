@@ -4,5 +4,5 @@
 
 __version__ = "0.1"
 
-import athena
-import postgres
+from .athena import *
+from .postgres import *
