@@ -28,8 +28,8 @@ def get_version(rel_path: str) -> str:
 long_description = read('README.md')
 
 setup(
-    name="datalake-etl-schema",
-	version=get_version("src/datalake_etl_schema/__init__.py"),
+    name="datalake-etl.etl-schema",
+	version=get_version("src/datalake_etl/etl_schema/__init__.py"),
 	description="Schema library for normalize DataFrames.",
 	long_description=long_description,
 	classifiers=[

@@ -5,9 +5,17 @@
 Get command: (EARLY)
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib@etl.schema#name=datalake-etl-schema\;branch=package.etl
+gpip get github.com/Webjet/datalake-pylib@etl.schema#name=datalake-etl.etl-schema\;branch=package.etl
 ```
 
 On requirements:
 
-github.com/Webjet/datalake-pylib@etl.schema#name=datalake-etl-schema;branch=package.etl
+```bash
+github.com/Webjet/datalake-pylib@etl.schema#name=datalake-etl.etl-schema;branch=package.etl
+```
+
+## Usage
+
+```python
+from datalake_etl import etl_schema
+```
