@@ -1,16 +1,26 @@
 # Validation Package
 
+**Work in progress**
+
 ## Installation
 
 Get command: (EARLY)
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib@validation#name=datalake-validation\;branch=package.validation
+gpip get github.com/Webjet/datalake-pylib@etl.validation#name=datalake-etl.etl-validation\;branch=package.etl
 ```
 
 On requirements:
 
-github.com/Webjet/datalake-pylib@validation#name=datalake-validation;branch=package.validation
+```
+github.com/Webjet/datalake-pylib@etl.validation#name=datalake-etl.etl-validation;branch=package.etl
+```
+
+## Import
+
+```python
+from datalake_etl import etl_validation
+```
 
 ### Return schemas
 

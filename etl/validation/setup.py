@@ -30,9 +30,9 @@ def get_version(rel_path: str) -> str:
 long_description = read('README.md')
 
 setup(
-    name="datalake-validation",
-	version=get_version("src/datalake_validation/__init__.py"),
-	description="",
+    name="datalake-etl.etl-validation",
+	version=get_version("src/datalake_etl/etl_validation/__init__.py"),
+	description="A validation library for make comparison between DataFrames.",
 	long_description=long_description,
 	classifiers=[
 		"Intended Audience :: Developers",
