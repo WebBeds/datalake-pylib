@@ -30,7 +30,7 @@ long_description = read('README.md')
 setup(
     name="datalake-etl.etl-s3",
 	version=get_version("src/datalake_etl/etl_s3/__init__.py"),
-	description="Schema library for normalize DataFrames.",
+	description="Library for manage S3 Objets and use with Pandas DataFrames.",
 	long_description=long_description,
 	classifiers=[
 		"Intended Audience :: Developers",
