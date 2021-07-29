@@ -6,16 +6,16 @@ Manage Athena and Postgres DataFrames and queries.
 
 ## Install
 
-Get command: (EARLY)
+Using get command: (EARLY)
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib@etl.database#name=datalake-etl.etl-database\;branch=package.etl
+gpip get github.com/Webjet/datalake-pylib/etl/database:datalake-etl.etl-database
 ```
 
-On requirements:
+Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib@etl.database#name=datalake-etl.etl-database;branch=package.etl
+github.com/Webjet/datalake-pylib/etl/database:datalake-etl.etl-database
 ```
 
 ## Import

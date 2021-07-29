@@ -2,16 +2,16 @@
 
 ## Installation
 
-Get command: (EARLY)
+Using get command:
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib@etl.schema#name=datalake-etl.etl-schema
+gpip get github.com/Webjet/datalake-pylib/etl/schema:datalake-etl.etl-schema
 ```
 
-On requirements:
+Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib@etl.schema#name=datalake-etl.etl-schema
+github.com/Webjet/datalake-pylib/etl/schema:datalake-etl.etl-schema
 ```
 
 ## Usage
