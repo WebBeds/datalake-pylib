@@ -24,6 +24,50 @@ The versions can be specified in the gpip installation, as the #version flag, wh
 
 ---
 
+## **Current packages**
+
+The packages are separated by groups.
+
+<details>
+    <summary>
+        <b>ETL</b> Library <span style="margin-left:5px;font-size:9px">Utility packages of Datalake.</span>
+    </summary>
+    <ul>
+        <li>
+            <h5>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/schema">
+                    <b>Schema</b><sub style="color:red"><b>EARLY</b></sub>
+                </a>
+            </h5>
+            <p style="font-size:10px">
+                Normalize dataframes.
+            </p>
+        </li>
+        <li>
+            <h5>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/validation">
+                    <b>Validation</b><sub style="color:red"><b>EARLY</b></sub>
+                </a>
+            </h5>
+            <p style="font-size:10px">
+                Make comparisons with DataFrames.
+            </p>
+        </li>
+        <li>
+            <h5>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/s3">
+                    <b>S3</b><sub style="color:red"><b>EARLY</b></sub>
+                </a>
+            </h5>
+            <p style="font-size:10px">
+                Manage and make action on S3 with Pandas DataFrames.
+            </p>
+        </li>
+    </ul>
+</details>
+
+---
+
 ## Example of installation of a package.
 
 This will install the [Schema package](https://github.com/Webjet/datalake-pylib/tree/main/etl/schema) of the **etl** group.
