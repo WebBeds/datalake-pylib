@@ -35,8 +35,8 @@ The packages are separated by groups.
     <ul>
         <li>
             <h5>
-                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/schema">
-                    <b>Schema</b><sub style="color:red"><b>EARLY</b></sub>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/4b6d91b8ffe0520945a43419b6eb57754ef1ac08/etl/schema">
+                    <b>Schema</b> <b style="color:lightblue">etl-schema-0.1</b>
                 </a>
             </h5>
             <p style="font-size:10px">
