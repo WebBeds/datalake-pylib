@@ -232,7 +232,7 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
 
     return fails, False
 
-def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs):
+def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> DataFrame:
     """
     Compare two DataFrames with Row per Row comparison checking columns.
 
