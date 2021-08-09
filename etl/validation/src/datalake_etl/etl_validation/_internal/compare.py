@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
-from pandas import DataFrame, concat
+from pandas import DataFrame, concat, Series
+from datetime import datetime
 from typing import Tuple
+
+from .check_methods import default_check
 
 class ComparisonException(Exception):
     def __init__(self, *args: object) -> None:
@@ -17,6 +20,13 @@ def read_parameters(**kwargs):
     second_df_static = None
 
     value_names: list = ["value1", "value2"]
+    rename_options: dict = {
+        "time": "time",
+        "message": "message",
+        "column": "column"
+    }
+
+    optional_data: dict = None
 
     if "schema" in kwargs and isinstance(kwargs["schema"],dict):
         schema = kwargs["schema"]
@@ -36,7 +46,13 @@ def read_parameters(**kwargs):
     if "value" in kwargs and isinstance(kwargs["value"],list):
         value_names = kwargs["value_names"]
 
-    return schema, failfast, failindex, first_df_static, second_df_static, value_names
+    if "rename_options" in kwargs and isinstance(kwargs["rename_options"],dict):
+        rename_options = kwargs["rename_options"]
+
+    if "optional_data" in kwargs:
+        optional_data = kwargs["optional_data"]
+
+    return schema, failfast, failindex, first_df_static, second_df_static, value_names, rename_options, optional_data
 
 def normalize_dataframes(*args):
     
@@ -72,10 +88,151 @@ def normalize_dataframes(*args):
 
     return Tuple(dataframes), Tuple(static), columns
 
-def isolate_comparison(values: list, **kwargs):
-    pass
+def isolate_comparison(values: list, **kwargs) -> DataFrame:
+    
+    value_1 = values[0]
+    value_2 = values[1]
 
-def compare_dataframes(first_df: DataFrame,second_df: DataFrame,**kwargs):
+    fails = DataFrame()
+
+    if kwargs["functions"] != None:
+
+        for f in kwargs["functions"]:
+
+            r = f(value_1, value_2,**kwargs["optional_data"])
+
+            if not r["success"]:
+                
+                findex_1 = "None"
+                findex_2 = "None"
+                
+                df_static_data_values = "None"
+                df2_static_data_values = "None"
+
+                if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
+                    findex_1 = kwargs["row"][0][kwargs["failindex"]]
+
+                if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
+                    findex_2 = kwargs["row"][1][kwargs["failindex"]]
+
+                if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
+                    findex_1 = list()
+                    for i in kwargs["failindex"]:
+                        findex_1.append(kwargs["row"][0][i])
+                
+                if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
+                    findex_2 = list()
+                    for i in kwargs["failindex"]:
+                        findex_2.append(kwargs["row"][1][i])
+
+                if kwargs["static"][0] != None and isinstance(kwargs["static"][0],list):
+                    df_static_data_values = list()
+                    for i in kwargs["static"][0]:
+                        df_static_data_values.append(kwargs["static"][0][i])
+
+                if kwargs["static"][1] != None and isinstance(kwargs["static"][1],list):
+                    df2_static_data_values = list()
+                    for i in kwargs["static"][1]:
+                        df2_static_data_values.append(kwargs["static"][1][i])
+
+                fail_schema = {
+                    "success": False,
+                    "fail": {
+                        
+                        # RENAME OPTIONS
+                        kwargs["rename_options"]["message"]: r["fail"]
+                        ,kwargs["rename_options"]["column"]: kwargs["column"]
+                        ,kwargs["rename_options"]["time"]: datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                        
+                        # NAMES DONT CHANGE
+                        ,"failindex_1": findex_1
+                        ,"failindex_2": findex_2
+                        ,"static_1": df_static_data_values
+                        ,"static_2": df2_static_data_values
+                        
+                        # VALUE NAMES
+                        ,kwargs["value_names"][0]: value_1
+                        ,f"{kwargs['value_names'][0]}_type": str(type(value_1))
+
+                        ,kwargs["value_names"][1]: value_2
+                        ,f"{kwargs['value_names'][1]}_type": str(type(value_2))
+
+                    }
+                }
+
+                fails = fails.append(Series(fail_schema["fail"]),ignore_index=True)
+
+                if kwargs["failfast"]:
+                    return fails, True
+
+    else:
+
+        r = default_check(value_1, value_2,**kwargs["optional_data"])
+
+        if not r["success"]:
+            
+            findex_1 = "None"
+            findex_2 = "None"
+            
+            df_static_data_values = "None"
+            df2_static_data_values = "None"
+
+            if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
+                findex_1 = kwargs["row"][0][kwargs["failindex"]]
+
+            if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
+                findex_2 = kwargs["row"][1][kwargs["failindex"]]
+
+            if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
+                findex_1 = list()
+                for i in kwargs["failindex"]:
+                    findex_1.append(kwargs["row"][0][i])
+            
+            if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
+                findex_2 = list()
+                for i in kwargs["failindex"]:
+                    findex_2.append(kwargs["row"][1][i])
+
+            if kwargs["static"][0] != None and isinstance(kwargs["static"][0],list):
+                df_static_data_values = list()
+                for i in kwargs["static"][0]:
+                    df_static_data_values.append(kwargs["static"][0][i])
+
+            if kwargs["static"][1] != None and isinstance(kwargs["static"][1],list):
+                df2_static_data_values = list()
+                for i in kwargs["static"][1]:
+                    df2_static_data_values.append(kwargs["static"][1][i])
+
+            fail_schema = {
+                "success": False,
+                "fail": {
+                    
+                    # RENAME OPTIONS
+                    kwargs["rename_options"]["message"]: r["fail"]
+                    ,kwargs["rename_options"]["column"]: kwargs["column"]
+                    ,kwargs["rename_options"]["time"]: datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                    
+                    # NAMES DONT CHANGE
+                    ,"failindex_1": findex_1
+                    ,"failindex_2": findex_2
+                    ,"static_1": df_static_data_values
+                    ,"static_2": df2_static_data_values
+                    
+                    # VALUE NAMES
+                    ,kwargs["value_names"][0]: value_1
+                    ,f"{kwargs['value_names'][0]}_type": str(type(value_1))
+
+                    ,kwargs["value_names"][1]: value_2
+                    ,f"{kwargs['value_names'][1]}_type": str(type(value_2))
+
+                }
+            }
+
+            fails = fails.append(Series(fail_schema["fail"]),ignore_index=True)
+
+    return fails, False
+
+def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs):
     """
     Compare two DataFrames with Row per Row comparison checking columns.
 
@@ -103,11 +260,21 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame,**kwargs):
 
     - value_names: list = ["value1", "value2"]
         - Specify the value names that will be returned.
+
+    - rename_options: dict = {
+        "time": "time",
+        "message": "message",
+        "column": "column"
+    }
+        - Rename basic report columns to specified names.
     
+    - optional_data: dict = None
+        - Will be passed to a schema function as kwargs. User will expect kwargs if need.
+
     """
     
     # Read parameters
-    schema, failfast, failindex, first_static, second_static, value_names = read_parameters(**kwargs)
+    schema, failfast, failindex, first_static, second_static, value_names, rename_options, optional_data = read_parameters(**kwargs)
 
     # Normalize dataframes and get static data.
     first_df, second_df, first_static_df, second_static_df, columns = normalize_dataframes({"dataframe": first_df, "static": first_static},{"dataframe": second_df, "static": second_static})
@@ -130,10 +297,15 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame,**kwargs):
         
             r, fail = isolate_comparison(
                 values=[first_value, second_value]
+                ,row=[first_values,second_values]
+                ,column=columns[c]
                 ,functions=functions
                 ,static=[first_static_values,second_static_values]
                 ,failindex=failindex
                 ,value_names=value_names
+                ,rename_options=rename_options
+                ,optional_data=optional_data
+                ,failfast=failfast
             )
 
             report = concat([report,r],ignore_index=True)
