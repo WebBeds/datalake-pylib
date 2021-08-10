@@ -88,7 +88,7 @@ def normalize_dataframes(*args):
 
     dataframes.extend(static)
 
-    return *tuple(dataframes), columns
+    return dataframes, columns
 
 def isolate_comparison(values: list, **kwargs) -> DataFrame:
     
@@ -279,7 +279,8 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
     schema, failfast, failindex, first_static, second_static, value_names, rename_options, optional_data = read_parameters(**kwargs)
 
     # Normalize dataframes and get static data.
-    first_df, second_df, first_static_df, second_static_df, columns = normalize_dataframes({"dataframe": first_df, "static": first_static},{"dataframe": second_df, "static": second_static})
+    dataframes, columns = normalize_dataframes({"dataframe": first_df, "static": first_static},{"dataframe": second_df, "static": second_static})
+    first_df, second_df, first_static_df, second_static_df = dataframes[0], dataframes[1], dataframes[2], dataframes[3]
     
     columns = list(columns)
 
