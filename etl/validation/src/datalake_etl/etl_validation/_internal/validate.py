@@ -41,6 +41,42 @@ class Validator:
     """
     Allows to compare two dataframes with a custom schema and other options, you can apply
     concurrent comparison by passing a 'comparator' function to apply to the 'concurrent_comparison' method.
+    
+    - args: list
+        - the dataframes two compare, now supports two.
+
+    Optional parameters:
+
+    - schema: dict = None
+        - The comparison schema, specify some custom functions to columns.
+    - failfast: bool = True
+        - The comparison will end at the first fail.
+    
+    - failindex: str | list = None
+        - The columns that will be as index and you can deconstruct.
+    
+    - first_df_static: str | list = None
+        - The columns that will be used as static data, dont be compared but will be accessible
+        to use in the static_1 column and deconstruct. Dont need to be on the two dataframes to 
+        get, it must to be in first, but it could be ignored because the intersection of columns.
+    - second_df_static: str | list = None
+        - The columns that will be used as static data, dont be compared but will be accessible
+        to use in the static_2 column and deconstruct. Dont need to be on the two dataframes to 
+        get, it must to be on second, but it could be ignored because the intersection of columns.
+    
+    - value_names: list = ["value1", "value2"]
+        - Specify the value names that will be returned.
+
+    - rename_options: dict = {
+        "time": "time",
+        "message": "message",
+        "column": "column"
+    }
+        - Rename basic report columns to specified names.
+    
+    - optional_data: dict = None
+        - Will be passed to a schema function as kwargs. User will expect kwargs if need.
+
     """
     def __init__(self, *args, **kwargs) -> None:
         
