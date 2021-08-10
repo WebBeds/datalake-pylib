@@ -3,7 +3,7 @@
 import time
 import pandas as pd
 from pyathena import connect
-from pyathena.pandas.cursor import PandasCursor
+from pyathena.pandas_cursor import PandasCursor
 
 def add_partition(db: str, table: str, region: str, tmp_results: str, partitions: str, verbose: bool):
     # Add partition if not exists
