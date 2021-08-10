@@ -79,7 +79,7 @@ class Validator:
     def __init__(self, *args, **kwargs) -> None:
         
         # Source DataFrames
-        self.sources = args
+        self.sources = list(args)
         self.kwargs = kwargs
 
         # Comparator
@@ -98,25 +98,26 @@ class Validator:
             different = None
 
             for idx, _ in enumerate(self.sources):
-                self.sources[idx] = self.sources[idx].columns.lower()
-                self.sources[idx] = self.sources[idx].sort_values(by=kwargs["sort_by"],ignore_index=True,inplace=True)
-                self.sources[idx] = self.sources[idx].drop_duplicates(subset=kwargs["index_by"],ignore_index=True,inplace=True)
+                
+                self.sources[idx].columns = self.sources[idx].columns.str.lower()
+                self.sources[idx].sort_values(by=kwargs["sort_by"],ignore_index=True,inplace=True)
+                self.sources[idx].drop_duplicates(subset=kwargs["index_by"],ignore_index=True,inplace=True)
 
                 if common == None:
-                    common = set(self.sources[kwargs["index_by"]].values)
+                    common = set(self.sources[idx][kwargs["index_by"]].values)
                 else:
-                    common = common.intersection(set(self.sources[kwargs["index_by"]].values))
+                    common = common.intersection(set(self.sources[idx][kwargs["index_by"]].values))
 
                 if different == None:
-                    different = set(self.sources[kwargs["index_by"]].values)
+                    different = set(self.sources[idx][kwargs["index_by"]].values)
                 else:
-                    different = different.difference(set(self.sources[kwargs["indexindex_by"]].values))
+                    different = different.difference(set(self.sources[idx][kwargs["index_by"]].values))
 
             self.common = common
             self.different = different            
 
             for idx, _ in enumerate(self.sources):
-                self.sources = self.sources[self.sources[idx].isin(common)]
+                self.sources[idx] = self.sources[idx][self.sources[idx][kwargs["index_by"]].isin(common)]
 
     def compare(self):
         if len(self.sources) < 2:
