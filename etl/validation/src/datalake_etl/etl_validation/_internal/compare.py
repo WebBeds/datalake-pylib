@@ -303,14 +303,15 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
             
             first_value, second_value = first_values[c], second_values[c]
             functions = None
+            column_name = first_df.columns[c]
 
-            if schema != None and columns[c] in schema:
-                functions = schema[columns[c]]
+            if schema != None and column_name in schema:
+                functions = schema[column_name]
         
             r, fail = isolate_comparison(
                 values=[first_value, second_value]
                 ,row=[first_values,second_values]
-                ,column=columns[c]
+                ,column=column_name
                 ,functions=functions
                 ,static=[first_static_values,second_static_values]
                 ,failindex=failindex
