@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 from multiprocessing import Pool, cpu_count
-
-from pandas.core.algorithms import diff
 from .compare import compare_dataframes
 
 import pandas as pd
@@ -124,7 +122,7 @@ class Validator:
         if len(self.sources) < 2:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
         if len(self.sources) > 2:
-            pass # Future implementation of comparison with check
+            return # Future implementation of comparison with check
         return compare_dataframes(
             self.sources[0]
             ,self.sources[1]

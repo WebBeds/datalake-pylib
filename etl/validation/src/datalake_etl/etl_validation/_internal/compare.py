@@ -2,7 +2,6 @@
 
 from pandas import DataFrame, concat, Series
 from datetime import datetime
-from typing import Tuple
 
 from .check_methods import default_check
 
@@ -34,16 +33,16 @@ def read_parameters(**kwargs):
     if "failfast" in kwargs and isinstance(kwargs["failfast"],bool):
         failfast = kwargs["failfast"]
 
-    if "failindex" in kwargs and isinstance(kwargs["failindex"],str) or isinstance(kwargs["failindex"],list):
+    if "failindex" in kwargs and isinstance(kwargs["failindex"],str) or "failindex" in kwargs and isinstance(kwargs["failindex"],list):
         failindex = kwargs["failindex"]
 
-    if "first_df_static" in kwargs and isinstance(kwargs["first_df_static"],str) or isinstance(kwargs["first_df_static"],list):
+    if "first_df_static" in kwargs and isinstance(kwargs["first_df_static"],str) or "first_df_static" in kwargs and isinstance(kwargs["first_df_static"],list):
         first_df_static = kwargs["first_df_static"]
 
-    if "second_df_static" in kwargs and isinstance(kwargs["second_df_static"],str) or isinstance(kwargs["second_df_static"],list):
+    if "second_df_static" in kwargs and isinstance(kwargs["second_df_static"],str) or "second_df_static" in kwargs and isinstance(kwargs["second_df_static"],list):
         second_df_static = kwargs["second_df_static"]
 
-    if "value" in kwargs and isinstance(kwargs["value"],list):
+    if "value_names" in kwargs and isinstance(kwargs["value_names"],list):
         value_names = kwargs["value_names"]
 
     if "rename_options" in kwargs and isinstance(kwargs["rename_options"],dict):
@@ -56,9 +55,9 @@ def read_parameters(**kwargs):
 
 def normalize_dataframes(*args):
     
-    static_values = list()
-    static = list()
-    dataframes = list()
+    static_values: list = []
+    static: list = [None, None]
+    dataframes: list = []
     columns = None
 
     # Map dataframes
@@ -75,7 +74,8 @@ def normalize_dataframes(*args):
         d.columns = d.columns.str.lower()
 
     # Get static data
-    for s in static_values:
+    for idx, s in enumerate(static_values):
+        static.pop(idx)
         static.append(
             dataframes[s["id"]][s["static"]].copy()
         )
@@ -86,7 +86,9 @@ def normalize_dataframes(*args):
             columns = set(d.columns)
         columns.intersection(set(d.columns))
 
-    return Tuple(dataframes), Tuple(static), columns
+    dataframes.extend(static)
+
+    return *tuple(dataframes), columns
 
 def isolate_comparison(values: list, **kwargs) -> DataFrame:
     
@@ -99,7 +101,7 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
 
         for f in kwargs["functions"]:
 
-            r = f(value_1, value_2,**kwargs["optional_data"])
+            r = f(value_1, value_2,kwargs["optional_data"])
 
             if not r["success"]:
                 
@@ -167,7 +169,7 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
 
     else:
 
-        r = default_check(value_1, value_2,**kwargs["optional_data"])
+        r = default_check(value_1, value_2)
 
         if not r["success"]:
             
@@ -278,6 +280,8 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
 
     # Normalize dataframes and get static data.
     first_df, second_df, first_static_df, second_static_df, columns = normalize_dataframes({"dataframe": first_df, "static": first_static},{"dataframe": second_df, "static": second_static})
+    
+    columns = list(columns)
 
     # Fail report
     report = DataFrame()
@@ -285,8 +289,16 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
     for r in range(len(first_df)):
         
         first_values, second_values = first_df.iloc[r], second_df.iloc[r]
-        first_static_values, second_static_values = (None,first_static_df.iloc[r])[first_static != None], (None,second_static_df.iloc[r])[second_static != None]
+        
+        first_static_values = None
+        second_static_values = None
 
+        if first_static != None:
+            first_static_values = first_static_df.iloc[r]
+
+        if second_static != None:
+            second_static_values = second_static_df.iloc[r]
+        
         for c in range(len(first_values)):
             
             first_value, second_value = first_values[c], second_values[c]
