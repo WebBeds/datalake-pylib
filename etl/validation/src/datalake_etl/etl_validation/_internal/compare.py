@@ -17,6 +17,7 @@ def read_parameters(**kwargs):
     failindex = None
     first_df_static = None
     second_df_static = None
+    third_df_static = None
 
     value_names: list = ["value1", "value2"]
     rename_options: dict = {
@@ -42,6 +43,9 @@ def read_parameters(**kwargs):
     if "second_df_static" in kwargs and isinstance(kwargs["second_df_static"],str) or "second_df_static" in kwargs and isinstance(kwargs["second_df_static"],list):
         second_df_static = kwargs["second_df_static"]
 
+    if "third_df_static" in kwargs and isinstance(kwargs["third_df_static"],str) or "third_df_static" in kwargs and isinstance(kwargs["third_df_static"],list):
+        third_df_static = kwargs["third_df_static"]
+
     if "value_names" in kwargs and isinstance(kwargs["value_names"],list):
         value_names = kwargs["value_names"]
 
@@ -51,12 +55,12 @@ def read_parameters(**kwargs):
     if "optional_data" in kwargs:
         optional_data = kwargs["optional_data"]
 
-    return schema, failfast, failindex, first_df_static, second_df_static, value_names, rename_options, optional_data
+    return schema, failfast, failindex, [first_df_static, second_df_static, third_df_static], value_names, rename_options, optional_data
 
 def normalize_dataframes(*args):
     
     static_values: list = []
-    static: list = [None, None]
+    static: list = [None, None, None]
     dataframes: list = []
     columns = None
 
@@ -84,7 +88,11 @@ def normalize_dataframes(*args):
     for d in dataframes:
         if columns == None:
             columns = set(d.columns)
-        columns.intersection(set(d.columns))
+        columns = columns.intersection(d.columns)
+
+    # Apply the columns to the DataFrames
+    for idx, _ in enumerate(dataframes):
+        dataframes[idx] = dataframes[idx][list(columns)]
 
     dataframes.extend(static)
 
@@ -106,7 +114,6 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
             if not r["success"]:
                 
                 findex_1 = "None"
-                findex_2 = "None"
                 
                 df_static_data_values = "None"
                 df2_static_data_values = "None"
@@ -114,19 +121,11 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
                 if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
                     findex_1 = kwargs["row"][0][kwargs["failindex"]]
 
-                if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
-                    findex_2 = kwargs["row"][1][kwargs["failindex"]]
-
                 if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
                     findex_1 = list()
                     for i in kwargs["failindex"]:
                         findex_1.append(kwargs["row"][0][i])
                 
-                if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
-                    findex_2 = list()
-                    for i in kwargs["failindex"]:
-                        findex_2.append(kwargs["row"][1][i])
-
                 if kwargs["static"][0] != None and isinstance(kwargs["static"][0],list):
                     df_static_data_values = list()
                     for i in kwargs["static"][0]:
@@ -148,7 +147,6 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
                         
                         # NAMES DONT CHANGE
                         ,"failindex_1": findex_1
-                        ,"failindex_2": findex_2
                         ,"static_1": df_static_data_values
                         ,"static_2": df2_static_data_values
                         
@@ -174,7 +172,6 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
         if not r["success"]:
             
             findex_1 = "None"
-            findex_2 = "None"
             
             df_static_data_values = "None"
             df2_static_data_values = "None"
@@ -182,18 +179,10 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
             if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
                 findex_1 = kwargs["row"][0][kwargs["failindex"]]
 
-            if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
-                findex_2 = kwargs["row"][1][kwargs["failindex"]]
-
             if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
                 findex_1 = list()
                 for i in kwargs["failindex"]:
                     findex_1.append(kwargs["row"][0][i])
-            
-            if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
-                findex_2 = list()
-                for i in kwargs["failindex"]:
-                    findex_2.append(kwargs["row"][1][i])
 
             if kwargs["static"][0] != None and isinstance(kwargs["static"][0],list):
                 df_static_data_values = list()
@@ -216,7 +205,6 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
                     
                     # NAMES DONT CHANGE
                     ,"failindex_1": findex_1
-                    ,"failindex_2": findex_2
                     ,"static_1": df_static_data_values
                     ,"static_2": df2_static_data_values
                     
@@ -276,7 +264,8 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
     """
     
     # Read parameters
-    schema, failfast, failindex, first_static, second_static, value_names, rename_options, optional_data = read_parameters(**kwargs)
+    schema, failfast, failindex, static_data, value_names, rename_options, optional_data = read_parameters(**kwargs)
+    first_static, second_static, _ = tuple(static_data)
 
     # Normalize dataframes and get static data.
     dataframes, columns = normalize_dataframes({"dataframe": first_df, "static": first_static},{"dataframe": second_df, "static": second_static})
@@ -328,3 +317,88 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
                 return report
 
     return report
+
+def compare_dataframes_with_check(*args, **kwargs) -> DataFrame:
+    """
+    Compare dataframes, checking the two inputs between with a third that will be checked when
+    the comparison between two fails.
+
+    - Considerations to follow:
+        - In order to make the comparison, the data must be supplied correctly,
+        the data must be present in all the DataFrames in the same way, same number of rows.
+        In most cases a preprocess before the comparison must be done.
+
+    """
+
+    # Read parameters
+    schema, failfast, failindex, static_data, value_names, rename_options, optional_data = read_parameters(**kwargs)
+    first_static, second_static, third_static = tuple(static_data)
+
+    # Normalize dataframes and get static data.  
+    dataframes, columns = normalize_dataframes({"dataframe": args[0], "static": first_static},{"dataframe": args[1], "static": second_static},{"dataframe": args[2], "static": third_static})
+    first_df, second_df, third_df, first_static_df, second_static_df, third_static_df = dataframes[0], dataframes[1], dataframes[2], dataframes[3], dataframes[4], dataframes[5]
+
+    columns = list(columns)
+
+    # Fail report
+    report = DataFrame()
+
+    for r in range(len(first_df)):
+        
+        first_values, second_values, third_values = first_df.iloc[r], second_df.iloc[r], third_df.iloc[r]
+        
+        first_static_values = None
+        second_static_values = None
+        third_static_values = None
+
+        if first_static != None:
+            first_static_values = first_static_df.iloc[r]
+
+        if second_static != None:
+            second_static_values = second_static_df.iloc[r]
+        
+        if third_static != None:
+            third_static_values = third_static_df.iloc[r]
+
+        for c in range(len(first_values)):
+            
+            first_value, second_value, third_value = first_values[c], second_values[c], third_values[c]
+            functions = None
+            column_name = first_df.columns[c]
+
+            if schema != None and column_name in schema:
+                functions = schema[column_name]
+        
+            r, fail = isolate_comparison(
+                values=[first_value, second_value]
+                ,row=[first_values,second_values]
+                ,column=column_name
+                ,functions=functions
+                ,static=[first_static_values,second_static_values]
+                ,failindex=failindex
+                ,value_names=value_names
+                ,rename_options=rename_options
+                ,optional_data=optional_data
+                ,failfast=failfast
+            )
+
+            if fail:
+                r, fail = isolate_comparison(
+                    values=[first_value, third_value]
+                    ,row=[first_values, third_values]
+                    ,column=column_name
+                    ,functions=functions
+                    ,static=[first_static_values,third_static_values]
+                    ,failindex=failindex
+                    ,value_names=value_names
+                    ,rename_options=rename_options
+                    ,optional_data=optional_data
+                    ,failfast=failfast
+                )
+
+            report = concat([report,r],ignore_index=True)
+
+            if failfast and fail:
+                return report
+
+    pass

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from multiprocessing import Pool, cpu_count
-from .compare import compare_dataframes
+from .compare import compare_dataframes, compare_dataframes_with_check
 
 import pandas as pd
 import numpy as np
@@ -9,25 +9,35 @@ import numpy as np
 class Comparator:
     def __init__(self,**kwargs):
         self.kwargs = kwargs
-    def compare(self,source_1: pd.DataFrame,source_2: pd.DataFrame) -> pd.DataFrame:
+    def compare(self,*args) -> pd.DataFrame:
+        if len(args) < 2:
+            raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
+        if len(args) > 2:
+            return compare_dataframes_with_check(
+                *args,
+                **self.kwargs
+            )
         return compare_dataframes(
-            first_df=source_1,
-            second_df=source_2,
-            **self.kwargs
+            *args
+            ,**self.kwargs
         )
 
-def concurrent_comparison(df: pd.DataFrame,df2: pd.DataFrame,comparator: Comparator,n_cores: int = None) -> pd.DataFrame:
+def concurrent_comparison(*sources,comparator: Comparator,n_cores: int = None) -> pd.DataFrame:
 
     if n_cores == None:
         n_cores = cpu_count() // 2
 
-    df_split = np.array_split(df,n_cores)
-    df2_split = np.array_split(df2,n_cores)
-    
+    dataframes = []
+
+    for s in sources:
+        dataframes.append(
+            np.array_split(s,n_cores)
+        )
+
     data = pd.DataFrame()
     
     with Pool(n_cores) as pool:
-        data = pd.concat(pool.starmap(comparator.compare,zip(df_split,df2_split)))
+        data = pd.concat(pool.starmap(comparator.compare,zip(*dataframes)))
     
     return data
 
@@ -41,7 +51,9 @@ class Validator:
     concurrent comparison by passing a 'comparator' function to apply to the 'concurrent_comparison' method.
     
     - args: list
-        - the dataframes two compare, now supports two.
+        - the dataframes to compare.
+            - Two dataframes: Normal comparison.
+            - Three dataframes: Comparison with check.
 
     Optional parameters:
 
@@ -123,7 +135,10 @@ class Validator:
         if len(self.sources) < 2:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
         if len(self.sources) > 2:
-            return # Future implementation of comparison with check
+            return compare_dataframes_with_check(
+                *self.sources,
+                **self.kwargs
+            )
         return compare_dataframes(
             self.sources[0]
             ,self.sources[1]
@@ -134,8 +149,7 @@ class Validator:
         if len(self.sources) < 2:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
         return concurrent_comparison(
-            self.sources[0],
-            self.sources[1],
+            *self.sources,
             self.comparator,
             self.cores
         )
