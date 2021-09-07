@@ -78,11 +78,8 @@ def normalize_dataframes(*args):
         d.columns = d.columns.str.lower()
 
     # Get static data
-    for idx, s in enumerate(static_values):
-        static.pop(idx)
-        static.append(
-            dataframes[s["id"]][s["static"]].copy()
-        )
+    for idx, _ in enumerate(static_values):
+        static[idx] = args[idx]["dataframe"].copy()
 
     # Intersection columns
     for d in dataframes:
@@ -118,6 +115,22 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
                 df_static_data_values = "None"
                 df2_static_data_values = "None"
 
+                if kwargs["static_columns"][0] != None and isinstance(kwargs["static_columns"][0],list) or isinstance(kwargs["static_columns"][0],str):
+                    if isinstance(kwargs["static_columns"][0],str):
+                        df_static_data_values = kwargs["static"][0][kwargs["static_columns"][0]]
+                    else:
+                        df_static_data_values = ()
+                        for i in kwargs["static_columns"][0]:
+                            df_static_data_values.append(kwargs["static"][0][i])
+
+                if kwargs["static_columns"][1] != None and isinstance(kwargs["static_columns"][1],list) or isinstance(kwargs["static_columns"][1],str):
+                    if isinstance(kwargs["static_columns"][1],str):
+                        df_static_data_values = kwargs["static"][1][kwargs["static_columns"][1]]
+                    else:
+                        df_static_data_values = ()
+                        for i in kwargs["static_columns"][1]:
+                            df_static_data_values.append(kwargs["static"][1][i])
+
                 if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
                     findex_1 = kwargs["row"][0][kwargs["failindex"]]
 
@@ -126,16 +139,6 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
                     for i in kwargs["failindex"]:
                         findex_1.append(kwargs["row"][0][i])
                 
-                if kwargs["static"][0] != None and isinstance(kwargs["static"][0],list):
-                    df_static_data_values = list()
-                    for i in kwargs["static"][0]:
-                        df_static_data_values.append(kwargs["static"][0][i])
-
-                if kwargs["static"][1] != None and isinstance(kwargs["static"][1],list):
-                    df2_static_data_values = list()
-                    for i in kwargs["static"][1]:
-                        df2_static_data_values.append(kwargs["static"][1][i])
-
                 fail_schema = {
                     "success": False,
                     "fail": {
@@ -176,6 +179,22 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
             df_static_data_values = "None"
             df2_static_data_values = "None"
 
+            if kwargs["static_columns"][0] != None and isinstance(kwargs["static_columns"][0],list) or isinstance(kwargs["static_columns"][0],str):
+                    if isinstance(kwargs["static_columns"][0],str):
+                        df_static_data_values = kwargs["static"][0][kwargs["static_columns"][0]]
+                    else:
+                        df_static_data_values = ()
+                        for i in kwargs["static_columns"][0]:
+                            df_static_data_values.append(kwargs["static"][0][i])
+
+            if kwargs["static_columns"][1] != None and isinstance(kwargs["static_columns"][1],list) or isinstance(kwargs["static_columns"][1],str):
+                if isinstance(kwargs["static_columns"][1],str):
+                    df_static_data_values = kwargs["static"][1][kwargs["static_columns"][1]]
+                else:
+                    df_static_data_values = ()
+                    for i in kwargs["static_columns"][1]:
+                        df_static_data_values.append(kwargs["static"][1][i])
+
             if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
                 findex_1 = kwargs["row"][0][kwargs["failindex"]]
 
@@ -183,16 +202,6 @@ def isolate_comparison(values: list, **kwargs) -> DataFrame:
                 findex_1 = list()
                 for i in kwargs["failindex"]:
                     findex_1.append(kwargs["row"][0][i])
-
-            if kwargs["static"][0] != None and isinstance(kwargs["static"][0],list):
-                df_static_data_values = list()
-                for i in kwargs["static"][0]:
-                    df_static_data_values.append(kwargs["static"][0][i])
-
-            if kwargs["static"][1] != None and isinstance(kwargs["static"][1],list):
-                df2_static_data_values = list()
-                for i in kwargs["static"][1]:
-                    df2_static_data_values.append(kwargs["static"][1][i])
 
             fail_schema = {
                 "success": False,
@@ -303,6 +312,7 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
                 ,row=[first_values,second_values]
                 ,column=column_name
                 ,functions=functions
+                ,static_columns=[first_static,second_static]
                 ,static=[first_static_values,second_static_values]
                 ,failindex=failindex
                 ,value_names=value_names
@@ -374,6 +384,7 @@ def compare_dataframes_with_check(*args, **kwargs) -> DataFrame:
                 ,row=[first_values,second_values]
                 ,column=column_name
                 ,functions=functions
+                ,static_columns=[first_static,second_static,third_static]
                 ,static=[first_static_values,second_static_values]
                 ,failindex=failindex
                 ,value_names=value_names
@@ -388,6 +399,7 @@ def compare_dataframes_with_check(*args, **kwargs) -> DataFrame:
                     ,row=[first_values, third_values]
                     ,column=column_name
                     ,functions=functions
+                    ,static_columns=[first_static,second_static,third_static]
                     ,static=[first_static_values,third_static_values]
                     ,failindex=failindex
                     ,value_names=value_names
