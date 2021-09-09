@@ -18,8 +18,9 @@ class Comparator:
                 **self.kwargs
             )
         return compare_dataframes(
-            *args
-            ,**self.kwargs
+            args[0],
+            args[1],
+            **self.kwargs
         )
 
 def concurrent_comparison(*sources,comparator: Comparator,n_cores: int = None) -> pd.DataFrame:
@@ -37,7 +38,7 @@ def concurrent_comparison(*sources,comparator: Comparator,n_cores: int = None) -
     data = pd.DataFrame()
     
     with Pool(n_cores) as pool:
-        data = pd.concat(pool.starmap(comparator.compare,zip(*dataframes)))
+        data = pd.concat(pool.starmap(comparator.compare,zip(dataframes[0],dataframes[1])))
     
     return data
 
@@ -148,6 +149,8 @@ class Validator:
     def concurrent_comparison(self):
         if len(self.sources) < 2:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
+        if len(self.sources) > 2:
+            raise Exception(f"concurrent comparison with more than two dataframes is not yet supported.")
         return concurrent_comparison(
             *self.sources,
             self.comparator,
