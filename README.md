@@ -63,6 +63,37 @@ The packages are separated by groups.
                 Manage and make action on S3 with Pandas DataFrames.
             </p>
         </li>
+        <li>
+            <h5>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/database">
+                    <b>Database</b><sub style="color:red"><b>EARLY</b></sub>
+                </a>
+            </h5>
+            <p style="font-size:10px">
+                Interact with AWS Athena or Postgres, send queries or get dataframes.
+            </p>
+        </li>
+        <li>
+            <h5>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/aws">
+                    <b>AWS</b><sub style="color:red"><b>EARLY</b></sub>
+                </a>
+            </h5>
+            <p style="font-size:10px">
+                Some usefull AWS methods that let your code be more dynamically.
+                Example, detect when the machine that is running your code is a Lambda function.
+            </p>
+        </li>
+        <li>
+            <h5>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/utils">
+                    <b>Utils</b><sub style="color:red"><b>EARLY</b></sub>
+                </a>
+            </h5>
+            <p style="font-size:10px">
+                Some usefull utilities without a common property but are utilized in the ETL repository. Example, send alarm to teams, loggin utility for making prints more complex.
+            </p>
+        </li>
     </ul>
 </details>
 
@@ -73,7 +104,7 @@ The packages are separated by groups.
 This will install the [Schema package](https://github.com/Webjet/datalake-pylib/tree/main/etl/schema) of the **etl** group.
 
 ```
-gpip get github.com/Webjet/datalake-pylib/etl/schema:datalake-etl.etl-schema
+gpip get github.com/Webjet/datalake-pylib/etl/schema:etl-schema
 ```
 
 ---
