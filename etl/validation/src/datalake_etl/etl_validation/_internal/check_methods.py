@@ -22,11 +22,6 @@ def default_check(v,v2) -> dict:
     # Check if one of the values is nan
     isNan = (str(v).lower() == "nan" or str(v).lower() == "nat") or (str(v2).lower() == "nan" or str(v2).lower() == "nat")
 
-    # Transform data by column type
-    if type(v) == float64 or type(v2) == float64:
-        v = float(v)
-        v2 = float(v2)
-
     # Timestamp test
     if isDate:
         result = default_date_check(v,v2)
