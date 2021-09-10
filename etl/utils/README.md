@@ -7,13 +7,13 @@ Get some utilities used along the ETL repository.
 Using get command:
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib/etl/utils:datalake-etl.etl-utils
+gpip get github.com/Webjet/datalake-pylib/etl/utils:etl-utils
 ```
 
 Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib/etl/utils:datalake-etl.etl-utils
+github.com/Webjet/datalake-pylib/etl/utils:etl-utils
 ```
 
 ## Import
