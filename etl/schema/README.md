@@ -12,7 +12,7 @@ gpip get github.com/Webjet/datalake-pylib/etl/schema:etl-schema==etl-schema-0.1
 Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib/etl/schema:etl-schema==etl-schema-0.1
+github.com/Webjet/datalake-pylib/etl/schema:etl-schema==datalake-etl.etl-schema-0.1
 ```
 
 ## Usage

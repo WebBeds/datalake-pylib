@@ -13,7 +13,7 @@ gpip get github.com/Webjet/datalake-pylib/etl/utils:etl-utils
 Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib/etl/utils:etl-utils
+github.com/Webjet/datalake-pylib/etl/utils:datalake-etl.etl-utils
 ```
 
 ## Import

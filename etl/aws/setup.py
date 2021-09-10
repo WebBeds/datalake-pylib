@@ -26,7 +26,7 @@ def get_version(rel_path: str) -> str:
 long_description = read('README.md')
 
 setup(
-    name="etl-aws",
+    name="datalake-etl.etl-aws",
 	version=get_version("src/datalake_etl/etl_aws/__init__.py"),
 	description="Library for manage basic services of AWS like SecretsManager.",
 	long_description=long_description,

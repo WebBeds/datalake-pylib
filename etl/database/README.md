@@ -9,13 +9,13 @@ Manage Athena and Postgres DataFrames and queries.
 Using get command: (EARLY)
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib/etl/database:etl-database
+gpip get github.com/Webjet/datalake-pylib/etl/database:datalake-etl.etl-database
 ```
 
 Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib/etl/database:etl-database
+github.com/Webjet/datalake-pylib/etl/database:datalake-etl.etl-database
 ```
 
 ## Import

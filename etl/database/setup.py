@@ -28,7 +28,7 @@ def get_version(rel_path: str) -> str:
 long_description = read('README.md')
 
 setup(
-    name="etl-database",
+    name="datalake-etl.etl-database",
 	version=get_version("src/datalake_etl/etl_database/__init__.py"),
 	description="Database library to work with DataFrames with Postgres and Athena.",
 	long_description=long_description,

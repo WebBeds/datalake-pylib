@@ -28,7 +28,7 @@ def get_version(rel_path: str) -> str:
 long_description = read('README.md')
 
 setup(
-    name="etl-utils",
+    name="datalake-etl.etl-utils",
 	version=get_version("src/datalake_etl/etl_utils/__init__.py"),
 	description="Utils library containing different utilities that are used in ETL repository.",
 	long_description=long_description,

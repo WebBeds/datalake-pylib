@@ -11,7 +11,7 @@ gpip get github.com/Webjet/datalake-pylib/etl/validation:etl-validation
 Specified on requirements:
 
 ```
-github.com/Webjet/datalake-pylib/etl/validation:etl-validation
+github.com/Webjet/datalake-pylib/etl/validation:datalake-etl.etl-validation
 ```
 
 ## Import

@@ -9,13 +9,13 @@ Work with AWS Services like SecretsManager and Others.
 Using get command: (EARLY)
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib/etl/aws:etl-aws
+gpip get github.com/Webjet/datalake-pylib/etl/aws:datalake-etl.etl-aws
 ```
 
 Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib/etl/aws:etl-aws
+github.com/Webjet/datalake-pylib/etl/aws:datalake-etl.etl-aws
 ```
 
 ## Import

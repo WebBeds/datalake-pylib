@@ -104,7 +104,7 @@ The packages are separated by groups.
 This will install the [Schema package](https://github.com/Webjet/datalake-pylib/tree/main/etl/schema) of the **etl** group.
 
 ```
-gpip get github.com/Webjet/datalake-pylib/etl/schema:etl-schema
+gpip get github.com/Webjet/datalake-pylib/etl/schema:datalake-etl.etl-schema
 ```
 
 ---
