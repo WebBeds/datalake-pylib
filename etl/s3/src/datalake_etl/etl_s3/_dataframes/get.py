@@ -57,3 +57,15 @@ def get_json_from_s3(bucket, key, verbose=False) -> pd.DataFrame:
     # Colum names to lowercase
     df.columns = df.columns.str.lower()
     return df
+
+def get_excel_from_s3(bucket, key, verbose=False) -> pd.DataFrame:
+    
+    key = parse.unquote(key)
+
+    # Read file and create dataframe
+    url = "s3://" + bucket + "/" + key
+    df = pd.read_excel(url, dtype=str, na_filter=False)
+
+    # Colum names to lowercase
+    df.columns = df.columns.str.lower()
+    return df
