@@ -153,6 +153,6 @@ class Validator:
             raise Exception(f"concurrent comparison with more than two dataframes is not yet supported.")
         return concurrent_comparison(
             *self.sources,
-            self.comparator,
-            self.cores
+            comparator=self.comparator,
+            n_cores=self.cores
         )
