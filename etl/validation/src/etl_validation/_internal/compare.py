@@ -446,31 +446,24 @@ def report_differences(differences: Series, **kwargs) -> DataFrame:
         for i in kwargs["failindex"]:
             findex_1.append(kwargs["row"][0][i])
 
-    fails = DataFrame()
+    def get_fail_schema(x: Series):
+        y = Series({
+            # RENAME OPTIONS
+            kwargs["rename_options"]["column"]: x.name
+            ,kwargs["rename_options"]["time"]: datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            # NAMES DONT CHANGE
+            ,"failindex_1": findex_1
+            ,"static_1": df_static_data_values
+            ,"static_2": df2_static_data_values
+            # VALUE NAMES
+            ,kwargs["value_names"][0]: x["self"]
+            ,f"{kwargs['value_names'][0]}_type": str(type(x["self"]))
+            ,kwargs["value_names"][1]: x["other"]
+            ,f"{kwargs['value_names'][1]}_type": str(type(x["other"]))
+        })
+        return y
 
-    for d in differences.index:
-        difference = differences.loc[d]
-        fail_schema = {
-            "success": False,
-            "fail": {
-                # RENAME OPTIONS
-                kwargs["rename_options"]["column"]: d
-                ,kwargs["rename_options"]["time"]: datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-
-                # NAMES DONT CHANGE
-                ,"failindex_1": findex_1
-                ,"static_1": df_static_data_values
-                ,"static_2": df2_static_data_values
-
-                # VALUE NAMES
-                ,kwargs["value_names"][0]: difference["self"]
-                ,f"{kwargs['value_names'][0]}_type": str(type(difference["self"]))
-                ,kwargs["value_names"][1]: difference["other"]
-                ,f"{kwargs['value_names'][1]}_type": str(type(difference["other"]))
-            }
-        }
-
-        fails = fails.append(Series(fail_schema["fail"]),ignore_index=True)
+    fails = differences.apply(lambda x: get_fail_schema(x),axis=1)
 
     return fails
 
@@ -514,7 +507,6 @@ def compare_dataframes_new(first_df: DataFrame,second_df: DataFrame, **kwargs) -
         - Will be passed to a schema function as kwargs. User will expect kwargs if need.
 
     """
-    
     # Read parameters
     schema, failfast, failindex, static_data, value_names, rename_options, optional_data = read_parameters(**kwargs)
     first_static, second_static, _ = tuple(static_data)
@@ -522,7 +514,6 @@ def compare_dataframes_new(first_df: DataFrame,second_df: DataFrame, **kwargs) -
     # Normalize dataframes and get static data.
     dataframes, columns = normalize_dataframes({"dataframe": first_df, "static": first_static},{"dataframe": second_df, "static": second_static})
     first_df, second_df, first_static_df, second_static_df = dataframes[0], dataframes[1], dataframes[2], dataframes[3]
-    
     columns = list(columns)
 
     # Fail report
