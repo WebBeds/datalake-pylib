@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 import os
 
 # ========================= #
@@ -26,9 +26,9 @@ def get_version(rel_path: str) -> str:
 long_description = read('README.md')
 
 setup(
-    name="datalake-etl.etl-aws",
-	version=get_version("src/datalake_etl/etl_aws/__init__.py"),
-	description="Library for manage basic services of AWS like SecretsManager.",
+    name="datalake-etl-aws",
+	version=get_version("src/datalake/etl/aws/__init__.py"),
+	description="Library for manage basic services of AWS.",
 	long_description=long_description,
 	classifiers=[
 		"Intended Audience :: Developers",
@@ -45,7 +45,7 @@ setup(
 	author="Carlos Pomares",
 	author_email="carlos.pomares@webbeds.com",
 	package_dir={"": "src"},
-	packages=find_packages(
+	packages=find_namespace_packages(
 		where="src",
 		exclude=["test","scripts"],
 	),

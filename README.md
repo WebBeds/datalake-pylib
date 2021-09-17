@@ -6,10 +6,10 @@ Private repository for store and maintain python packages used in different repo
 
 ## Requirements
 
-In order to utilize the packages that contain this repository you need to install **gpip** with **pip**, the recommended version is the 0.4.
+In order to utilize the packages that contain this repository you need to install **gpip** with **pip**, the recommended version is the 0.4.7
 
 ```bash
-pip3 install gpip==0.4
+pip3 install gpip==0.4.7
 ```
 
 ---
@@ -35,8 +35,8 @@ The packages are separated by groups.
     <ul>
         <li>
             <h5>
-                <a href="https://github.com/Webjet/datalake-pylib/tree/4b6d91b8ffe0520945a43419b6eb57754ef1ac08/etl/schema">
-                    <b>Schema</b> <b style="color:lightblue">etl-schema-0.1</b>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/schema">
+                    <b>Schema</b> <b style="color:lightblue">WIP</b>
                 </a>
             </h5>
             <p style="font-size:10px">
@@ -45,12 +45,12 @@ The packages are separated by groups.
         </li>
         <li>
             <h5>
-                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/validation">
-                    <b>Validation</b><sub style="color:red"><b>EARLY</b></sub>
+                <a href="https://github.com/Webjet/datalake-pylib/tree/main/etl/pandas">
+                    <b>Pandas</b><sub style="color:red"><b>EARLY</b></sub>
                 </a>
             </h5>
             <p style="font-size:10px">
-                Make comparisons with DataFrames.
+                Make actions with Pandas DataFrames like getting reports from differences between two DataFrames.
             </p>
         </li>
         <li>
@@ -104,7 +104,7 @@ The packages are separated by groups.
 This will install the [Schema package](https://github.com/Webjet/datalake-pylib/tree/main/etl/schema) of the **etl** group.
 
 ```
-gpip get github.com/Webjet/datalake-pylib/etl/schema:datalake-etl.etl-schema
+gpip get github.com/Webjet/datalake-pylib/etl/schema:datalake-etl-schema
 ```
 
 ---

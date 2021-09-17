@@ -9,19 +9,19 @@ Work with AWS Services like SecretsManager and Others.
 Using get command: (EARLY)
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib/etl/aws:datalake-etl.etl-aws
+gpip get github.com/Webjet/datalake-pylib/etl/aws:datalake-etl-aws
 ```
 
 Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib/etl/aws:datalake-etl.etl-aws
+github.com/Webjet/datalake-pylib/etl/aws:datalake-etl-aws
 ```
 
 ## Import
 
 ```python
-from datalake_etl import etl_aws
+from datalake.etl import aws
 ```
 
 ## Modules
@@ -29,7 +29,7 @@ from datalake_etl import etl_aws
 ### Secrets Manager
 
 ```python
-from datalake_etl.etl_aws.secretsmanager import get_secret
+from datalake.etl.aws.secretsmanager import get_secret
 ```
 
 ### Lambda
@@ -37,11 +37,11 @@ from datalake_etl.etl_aws.secretsmanager import get_secret
 * Check if the executor isLambda or not.
 
 ```python
-from datalake_etl.etl_aws.aws_lambda import isLambda
+from datalake.etl.aws.awslambda import is_lambda
 ```
 
 * Extract information of ObjectCreate event of lambda functions.
 
 ```python
-from datalake_etl.etl_aws.aws_lambda.events.object_create import get_s3_trigger_object_bucket, get_s3_trigger_object_key, get_s3_trigger_object_account
+from datalake.etl.aws.awslambda.events.object_create import get_s3_trigger_object_bucket, get_s3_trigger_object_key, get_s3_trigger_object_account
 ```

@@ -6,7 +6,7 @@
 __version__ = "0.1"
 
 # Data Types
-from ._internal.types import (
+from .types import (
     Dummy,
     Str,
     Float,
@@ -19,4 +19,4 @@ from ._internal.types import (
 )
 
 # Data Methods
-from ._internal.utilities import normalize_df
+from .utilities import normalize_df

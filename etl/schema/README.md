@@ -6,17 +6,17 @@
 Using get command:
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib/etl/schema:etl-schema==etl-schema-0.1
+gpip get github.com/Webjet/datalake-pylib/etl/schema:datalake-etl-schema
 ```
 
 Specified on requirements:
 
 ```bash
-github.com/Webjet/datalake-pylib/etl/schema:etl-schema==datalake-etl.etl-schema-0.1
+github.com/Webjet/datalake-pylib/etl/schema:datalake-etl-schema
 ```
 
 ## Usage
 
 ```python
-from datalake_etl import etl_schema
+from datalake.etl import schema
 ```

@@ -2,7 +2,7 @@
 # S3 SETUP                  #
 # ========================= #
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 import os
 
 # ========================= #
@@ -28,8 +28,8 @@ def get_version(rel_path: str) -> str:
 long_description = read('README.md')
 
 setup(
-    name="datalake-etl.etl-s3",
-	version=get_version("src/datalake_etl/etl_s3/__init__.py"),
+    name="datalake-etl-s3",
+	version=get_version("src/datalake/etl/s3/__init__.py"),
 	description="Library for manage S3 Objets and use with Pandas DataFrames.",
 	long_description=long_description,
 	classifiers=[
@@ -47,7 +47,7 @@ setup(
 	author="Carlos Pomares",
 	author_email="carlos.pomares@webbeds.com",
 	package_dir={"": "src"},
-	packages=find_packages(
+	packages=find_namespace_packages(
 		where="src",
 		exclude=["test","scripts"],
 	),

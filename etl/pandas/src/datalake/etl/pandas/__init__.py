@@ -1,7 +1,7 @@
 # ========================= #
-# VALIDATION LIBRARY        #
+# PANDAS LIBRARY            #
 # ========================= #
 
 __version__ = "0.1"
 
-from ._internal.validate import Validator
+from .report.validate import Validator
