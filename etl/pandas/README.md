@@ -1,23 +1,25 @@
-# Validation Package
+# Pandas Package of ETL Library
+
+Make actions with Pandas DataFrames, on this version you can generate a report of the differences between two DataFrames.
 
 ## Installation
 
 Using get command:
 
 ```bash
-gpip get github.com/Webjet/datalake-pylib/etl/validation:etl-validation
+gpip get github.com/Webjet/datalake-pylib/etl/pandas:datalake-etl-pandas
 ```
 
 Specified on requirements:
 
 ```
-github.com/Webjet/datalake-pylib/etl/validation:datalake-etl.etl-validation
+github.com/Webjet/datalake-pylib/etl/pandas:datalake-etl-pandas
 ```
 
 ## Import
 
 ```python
-from datalake_etl import etl_validation
+from datalake.etl import pandas
 ```
 
 ### Return schemas

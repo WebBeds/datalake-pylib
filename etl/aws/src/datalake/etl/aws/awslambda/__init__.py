@@ -4,5 +4,5 @@
 
 import os
 
-def isLambda() -> bool:
+def is_lambda() -> bool:
     return os.getenv("AWS_LAMBDA_FUNCTION_NAME") != None
