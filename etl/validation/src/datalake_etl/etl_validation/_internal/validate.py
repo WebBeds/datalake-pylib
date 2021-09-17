@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from multiprocessing import Pool, cpu_count
-from .compare import compare_dataframes, compare_dataframes_with_check
+from .compare import compare_dataframes, compare_dataframes_new
 
 import pandas as pd
 import numpy as np
@@ -12,10 +12,11 @@ class Comparator:
     def compare(self,*args) -> pd.DataFrame:
         if len(args) < 2:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
-        if len(args) > 2:
-            return compare_dataframes_with_check(
-                *args,
-                **self.kwargs
+        if "engine" in self.kwargs and self.kwargs["engine"] == "new":
+            return compare_dataframes_new(
+                args[0],
+                args[1],
+                **self.kwargs    
             )
         return compare_dataframes(
             args[0],
@@ -88,6 +89,9 @@ class Validator:
     - optional_data: dict = None
         - Will be passed to a schema function as kwargs. User will expect kwargs if need.
 
+    - engine: str = None ("new")
+        - Use the new engine for comparison, using pandas compare built-in methods.
+
     """
     def __init__(self, *args, **kwargs) -> None:
         
@@ -135,10 +139,11 @@ class Validator:
     def compare(self):
         if len(self.sources) < 2:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
-        if len(self.sources) > 2:
-            return compare_dataframes_with_check(
-                *self.sources,
-                **self.kwargs
+        if "engine" in self.kwargs and self.kwargs["engine"] == "new":
+            return compare_dataframes_new(
+                self.sources[0]
+                ,self.sources[1]
+                ,**self.kwargs
             )
         return compare_dataframes(
             self.sources[0]
@@ -149,8 +154,6 @@ class Validator:
     def concurrent_comparison(self):
         if len(self.sources) < 2:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
-        if len(self.sources) > 2:
-            raise Exception(f"concurrent comparison with more than two dataframes is not yet supported.")
         return concurrent_comparison(
             *self.sources,
             comparator=self.comparator,

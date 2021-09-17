@@ -328,26 +328,105 @@ def compare_dataframes(first_df: DataFrame,second_df: DataFrame, **kwargs) -> Da
 
     return report
 
-def compare_dataframes_with_check(*args, **kwargs) -> DataFrame:
+def report_differences(differences: Series, **kwargs) -> DataFrame:
+
+    findex_1 = "None"
+    
+    df_static_data_values = "None"
+    df2_static_data_values = "None"
+
+    if kwargs["static_columns"][0] != None and isinstance(kwargs["static_columns"][0],list) or isinstance(kwargs["static_columns"][0],str):
+            if isinstance(kwargs["static_columns"][0],str):
+                df_static_data_values = kwargs["static"][0][kwargs["static_columns"][0]]
+            else:
+                df_static_data_values = ()
+                for i in kwargs["static_columns"][0]:
+                    df_static_data_values.append(kwargs["static"][0][i])
+
+    if kwargs["static_columns"][1] != None and isinstance(kwargs["static_columns"][1],list) or isinstance(kwargs["static_columns"][1],str):
+        if isinstance(kwargs["static_columns"][1],str):
+            df_static_data_values = kwargs["static"][1][kwargs["static_columns"][1]]
+        else:
+            df_static_data_values = ()
+            for i in kwargs["static_columns"][1]:
+                df_static_data_values.append(kwargs["static"][1][i])
+
+    if kwargs["failindex"] != None and isinstance(kwargs["failindex"],str):
+        findex_1 = kwargs["row"][0][kwargs["failindex"]]
+
+    if kwargs["failindex"] != None and isinstance(kwargs["failindex"],list):
+        findex_1 = list()
+        for i in kwargs["failindex"]:
+            findex_1.append(kwargs["row"][0][i])
+
+    def get_fail_schema(x: Series):
+        y = Series({
+            # RENAME OPTIONS
+            kwargs["rename_options"]["column"]: x.name
+            ,kwargs["rename_options"]["time"]: datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            # NAMES DONT CHANGE
+            ,"failindex_1": findex_1
+            ,"static_1": df_static_data_values
+            ,"static_2": df2_static_data_values
+            # VALUE NAMES
+            ,kwargs["value_names"][0]: x["self"]
+            ,f"{kwargs['value_names'][0]}_type": str(type(x["self"]))
+            ,kwargs["value_names"][1]: x["other"]
+            ,f"{kwargs['value_names'][1]}_type": str(type(x["other"]))
+        })
+        return y
+
+    fails = differences.apply(lambda x: get_fail_schema(x),axis=1)
+
+    return fails
+
+def compare_dataframes_new(first_df: DataFrame,second_df: DataFrame, **kwargs) -> DataFrame:
     """
-    Compare dataframes, checking the two inputs between with a third that will be checked when
-    the comparison between two fails.
+    Compare two DataFrames with Row per Row comparison checking columns.
 
-    - Considerations to follow:
-        - In order to make the comparison, the data must be supplied correctly,
-        the data must be present in all the DataFrames in the same way, same number of rows.
-        In most cases a preprocess before the comparison must be done.
+    :param first_df: First dataframe, will be the primary and some options will be based on the primary.
+    :param second_df: Second dataframe, will be compared with primary dataframe.
+    :param **kwargs: Additional keyword arguments. List:
+    
+    Functional options:
+
+    - schema: dict = None
+        - Schema to be used instead of default comparison functions.
+    - failfast: bool = True
+        - At first failure, return the report of fails.
+    - failindex: str | list = None
+        - If specified will take the input column or list of columns and put the values into
+        a failindex key at return report.
+    - first_df_static: str | list = None
+        - If specified will take the input column or list of columns of the primary dataframe and will take from it.
+        This option if for columns that are not in the two DataFrames and you need to know when returning the report.
+    - second_df_static: str | list = None
+        - If specified will take the input column or list of columns of the second dataframe and will take from it.
+        Same as first_df_static.
+    
+    Return options:
+
+    - value_names: list = ["value1", "value2"]
+        - Specify the value names that will be returned.
+
+    - rename_options: dict = {
+        "time": "time",
+        "message": "message",
+        "column": "column"
+    }
+        - Rename basic report columns to specified names.
+    
+    - optional_data: dict = None
+        - Will be passed to a schema function as kwargs. User will expect kwargs if need.
 
     """
-
     # Read parameters
     schema, failfast, failindex, static_data, value_names, rename_options, optional_data = read_parameters(**kwargs)
-    first_static, second_static, third_static = tuple(static_data)
+    first_static, second_static, _ = tuple(static_data)
 
-    # Normalize dataframes and get static data.  
-    dataframes, columns = normalize_dataframes({"dataframe": args[0], "static": first_static},{"dataframe": args[1], "static": second_static},{"dataframe": args[2], "static": third_static})
-    first_df, second_df, third_df, first_static_df, second_static_df, third_static_df = dataframes[0], dataframes[1], dataframes[2], dataframes[3], dataframes[4], dataframes[5]
-
+    # Normalize dataframes and get static data.
+    dataframes, columns = normalize_dataframes({"dataframe": first_df, "static": first_static},{"dataframe": second_df, "static": second_static})
+    first_df, second_df, first_static_df, second_static_df = dataframes[0], dataframes[1], dataframes[2], dataframes[3]
     columns = list(columns)
 
     # Fail report
@@ -355,11 +434,10 @@ def compare_dataframes_with_check(*args, **kwargs) -> DataFrame:
 
     for r in range(len(first_df)):
         
-        first_values, second_values, third_values = first_df.iloc[r], second_df.iloc[r], third_df.iloc[r]
+        first_values, second_values = first_df.iloc[r], second_df.iloc[r]
         
         first_static_values = None
         second_static_values = None
-        third_static_values = None
 
         if first_static != None:
             first_static_values = first_static_df.iloc[r]
@@ -367,50 +445,28 @@ def compare_dataframes_with_check(*args, **kwargs) -> DataFrame:
         if second_static != None:
             second_static_values = second_static_df.iloc[r]
         
-        if third_static != None:
-            third_static_values = third_static_df.iloc[r]
+        differences = first_values.compare(second_values)
 
-        for c in range(len(first_values)):
-            
-            first_value, second_value, third_value = first_values[c], second_values[c], third_values[c]
-            functions = None
-            column_name = first_df.columns[c]
+        if differences.empty:
+            continue
 
-            if schema != None and column_name in schema:
-                functions = schema[column_name]
-        
-            r, fail = isolate_comparison(
-                values=[first_value, second_value]
-                ,row=[first_values,second_values]
-                ,column=column_name
-                ,functions=functions
-                ,static_columns=[first_static,second_static,third_static]
-                ,static=[first_static_values,second_static_values]
-                ,failindex=failindex
-                ,value_names=value_names
-                ,rename_options=rename_options
-                ,optional_data=optional_data
-                ,failfast=failfast
-            )
-
-            if fail:
-                r, fail = isolate_comparison(
-                    values=[first_value, third_value]
-                    ,row=[first_values, third_values]
-                    ,column=column_name
-                    ,functions=functions
-                    ,static_columns=[first_static,second_static,third_static]
-                    ,static=[first_static_values,third_static_values]
+        report = concat(
+            [
+                report
+                ,report_differences(
+                    differences
+                    ,row=[first_values,second_values]
+                    ,static_columns=[first_static,second_static]
+                    ,static=[first_static_values,second_static_values]
                     ,failindex=failindex
                     ,value_names=value_names
                     ,rename_options=rename_options
                     ,optional_data=optional_data
-                    ,failfast=failfast
                 )
+            ],ignore_index=True
+        )
 
-            report = concat([report,r],ignore_index=True)
+        if failfast:
+            return report
 
-            if failfast and fail:
-                return report
-
-    pass
+    return report
