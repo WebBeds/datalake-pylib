@@ -53,9 +53,11 @@ setup(
 	),
 	python_requires=">=3.6",
     install_requires=[
-		"pandas",
-        "boto3",
-        "pyarrow",
+		"pandas==1.2.4",
+		"numpy==1.19.4",
+        "boto3==1.16.45",
+        "pyarrow==2.0",
+		"s3fs==0.5.2",
 		"fsspec==0.8.3"
 	]
 )

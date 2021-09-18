@@ -51,8 +51,5 @@ setup(
 		where="src",
 		exclude=["test","scripts"],
 	),
-	python_requires=">=3.6",
-    install_requires=[
-		""
-	]
+	python_requires=">=3.6"
 )
