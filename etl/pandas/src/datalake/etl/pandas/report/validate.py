@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from multiprocessing import Pool, cpu_count
-from .compare import compare_dataframes, compare_dataframes_new
+from .compare import compare_dataframes, compare_dataframes_einstein, compare_dataframes_new
 
 import pandas as pd
 import numpy as np
@@ -18,6 +18,12 @@ class Comparator:
                 args[1],
                 **self.kwargs    
             )
+        if "engine" in self.kwargs and self.kwargs["engine"] == "einstein":
+            return compare_dataframes_einstein(
+                args[0],
+                args[1],
+                **self.kwargs    
+            )
         return compare_dataframes(
             args[0],
             args[1],
@@ -29,17 +35,21 @@ def concurrent_comparison(*sources,comparator: Comparator,n_cores: int = None) -
     if n_cores == None:
         n_cores = cpu_count() // 2
 
-    dataframes = []
+    
+    s0 = np.array_split(sources[0], n_cores)  # We split the source
+    s1 = [sources[1]] * len(s0)  # But keep all in the second file
 
-    for s in sources:
-        dataframes.append(
-            np.array_split(s,n_cores)
-        )
+    # dataframes = []
+    # for s in sources:
+    #     dataframes.append(
+    #         np.array_split(s,n_cores)
+    #     )
 
     data = pd.DataFrame()
     
     with Pool(n_cores) as pool:
-        data = pd.concat(pool.starmap(comparator.compare,zip(dataframes[0],dataframes[1])))
+        # data = pd.concat(pool.starmap(comparator.compare,zip(dataframes[0],dataframes[1])))
+        data = pd.concat(pool.starmap(comparator.compare, zip(s0, s1)))
     
     return data
 
@@ -89,8 +99,9 @@ class Validator:
     - optional_data: dict = None
         - Will be passed to a schema function as kwargs. User will expect kwargs if need.
 
-    - engine: str = None ("new")
+    - engine: str = None ("new", "einstein")
         - Use the new engine for comparison, using pandas compare built-in methods.
+        - Use the einstein engine for comparison.
 
     """
     def __init__(self, *args, **kwargs) -> None:
@@ -108,6 +119,15 @@ class Validator:
             cores = kwargs["cores"]
         self.cores = cores
 
+        if "ignore_values" in kwargs:
+            self.ignore_values = kwargs["ignore_values"]
+        else:
+            self.ignore_values = None
+
+        if self.ignore_values:
+            for idx, _ in enumerate(self.sources):
+                self.sources[idx] = self.sources[idx][~self.sources[idx][kwargs["failindex"]].isin(self.ignore_values)]
+
         # Sort functionality
         if "sort_by" in kwargs and "index_by" in kwargs:
 
@@ -118,7 +138,7 @@ class Validator:
                 
                 self.sources[idx].columns = self.sources[idx].columns.str.lower()
                 self.sources[idx].sort_values(by=kwargs["sort_by"],ignore_index=True,inplace=True)
-                self.sources[idx].drop_duplicates(subset=kwargs["index_by"],ignore_index=True,inplace=True)
+                # self.sources[idx].drop_duplicates(subset=kwargs["index_by"],ignore_index=True,inplace=True)
 
                 if common == None:
                     common = set(self.sources[idx][kwargs["index_by"]].values)
@@ -141,6 +161,12 @@ class Validator:
             raise Exception(f"insufficient data, only {len(self.sources)} dataframes")
         if "engine" in self.kwargs and self.kwargs["engine"] == "new":
             return compare_dataframes_new(
+                self.sources[0]
+                ,self.sources[1]
+                ,**self.kwargs
+            )
+        if "engine" in self.kwargs and self.kwargs["engine"] == "einstein":
+            return compare_dataframes_einstein(
                 self.sources[0]
                 ,self.sources[1]
                 ,**self.kwargs
