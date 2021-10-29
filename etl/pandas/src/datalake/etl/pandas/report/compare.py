@@ -3,7 +3,7 @@
 from pandas import DataFrame, concat, Series
 from datetime import datetime
 
-from .check_methods import default_check
+from .methods.check_methods import default_check
 
 class ComparisonException(Exception):
     def __init__(self, *args: object) -> None:
