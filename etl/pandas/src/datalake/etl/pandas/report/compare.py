@@ -470,3 +470,144 @@ def compare_dataframes_new(first_df: DataFrame,second_df: DataFrame, **kwargs) -
             return report
 
     return report
+
+def report_differences_einstein(key: str, differences: DataFrame, **kwargs) -> list:
+    df_static_data_values = "None"
+    df2_static_data_values = "None"
+
+    if "static_columns" in kwargs:
+        if kwargs["static_columns"][0] != None and isinstance(kwargs["static_columns"][0], list) or isinstance(kwargs["static_columns"][0], str):
+            if isinstance(kwargs["static_columns"][0], str):
+                df_static_data_values = kwargs["static"][0][kwargs["static_columns"][0]]
+            else:
+                df_static_data_values = ()
+                for i in kwargs["static_columns"][0]:
+                    df_static_data_values.append(kwargs["static"][0][i])
+
+        if kwargs["static_columns"][1] != None and isinstance(kwargs["static_columns"][1], list) or isinstance(kwargs["static_columns"][1], str):
+            if isinstance(kwargs["static_columns"][1], str):
+                df_static_data_values = kwargs["static"][1][kwargs["static_columns"][1]]
+            else:
+                df_static_data_values = ()
+                for i in kwargs["static_columns"][1]:
+                    df_static_data_values.append(kwargs["static"][1][i])
+
+    """
+    if kwargs["failindex"] != None and isinstance(kwargs["failindex"], str):
+        findex_1 = kwargs["row"][0][kwargs["failindex"]]
+
+    if kwargs["failindex"] != None and isinstance(kwargs["failindex"], list):
+        findex_1 = list()
+        for i in kwargs["failindex"]:
+            findex_1.append(kwargs["row"][0][i])
+    """
+
+    if differences is None:
+        # Missing second row, return the content in kwargs["error"]
+        return [{
+            "key": key, kwargs["rename_options"]["column"]: kwargs["failindex"], "failindex_1": key, kwargs["value_names"][0]: "", kwargs["value_names"][1]: kwargs["error"],
+        }]
+
+    response = []
+    for name, self, other in differences.itertuples():
+        response.append({
+            "key": key, kwargs["rename_options"]["column"]: name, "failindex_1": key, kwargs["value_names"][0]: self, kwargs["value_names"][1]: other,
+        })
+    return response
+
+def compare_dataframes_einstein(first_df: DataFrame, second_df: DataFrame, **kwargs) -> DataFrame:
+    """
+    Compare two DataFrames with Row per Row comparison checking columns.
+
+    :param first_df: First dataframe, will be the primary and some options will be based on the primary.
+    :param second_df: Second dataframe, will be compared with primary dataframe.
+    :param **kwargs: Additional keyword arguments. List:
+
+    Functional options:
+
+    - schema: dict = None
+        - Schema to be used instead of default comparison functions.
+    - failfast: bool = True
+        - At first failure, return the report of fails.
+    - failindex: str | list = None
+        - If specified will take the input column or list of columns and put the values into
+        a failindex key at return report.
+    - first_df_static: str | list = None
+        - If specified will take the input column or list of columns of the primary dataframe and will take from it.
+        This option if for columns that are not in the two DataFrames and you need to know when returning the report.
+    - second_df_static: str | list = None
+        - If specified will take the input column or list of columns of the second dataframe and will take from it.
+        Same as first_df_static.
+
+    Return options:
+
+    - value_names: list = ["value1", "value2"]
+        - Specify the value names that will be returned.
+
+    - rename_options: dict = {
+        "time": "time",
+        "message": "message",
+        "column": "column"
+    }
+        - Rename basic report columns to specified names.
+
+    - optional_data: dict = None
+        - Will be passed to a schema function as kwargs. User will expect kwargs if need.
+
+    """
+
+    # Read parameters
+    schema, failfast, failindex, static_data, value_names, rename_options, optional_data = read_parameters(**kwargs)
+    first_static, second_static, _ = tuple(static_data)
+
+    first_df
+    first_df = first_df.set_index(failindex)
+    second_df = second_df.set_index(failindex)
+
+    # Normalize dataframes and get static data.
+    """
+    dataframes, columns = normalize_dataframes({"dataframe": first_df, "static": first_static}, {
+                                               "dataframe": second_df, "static": second_static})
+    first_df, second_df, first_static_df, second_static_df = dataframes[0], dataframes[1], dataframes[2], dataframes[3]
+    columns = list(columns)
+    """
+
+    # Fail report
+    report = []
+
+    def compare_values(key: str, first: Series, second: Series) -> DataFrame:
+        differences = first.compare(second)
+        if differences.empty:
+            return []
+        return report_differences_einstein(
+            key, differences, row=[
+                first, second], failindex=failindex, value_names=value_names, rename_options=rename_options, optional_data=optional_data
+        )
+
+    # for r in range(len(first_df)):
+    for k, first_values in first_df.iterrows():
+        try:
+            second_values = second_df.loc[k]
+        except KeyError:
+            r = report_differences_einstein(k, None, failindex=failindex, value_names=value_names,
+                                   rename_options=rename_options, error="MISSING")
+            report.extend(r)
+            continue
+        if isinstance(second_values, DataFrame):  # we got several rows
+            # First report as duplicate
+            r = report_differences_einstein(k, None, failindex=failindex, value_names=value_names,
+                                   rename_options=rename_options, error="DUPLICATE")
+            report.extend(r)
+            for _, s in second_values.iterrows():
+                r = compare_values(k, first_values, s)
+                if r:
+                    report.extend(r)
+        else:
+            r = compare_values(k, first_values, second_values)
+            if r:
+                report.extend(r)
+
+        if failfast and len(report) > 0:
+            return report
+
+    return DataFrame(report)
