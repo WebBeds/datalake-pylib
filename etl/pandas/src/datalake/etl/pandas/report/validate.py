@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from multiprocessing import Pool, cpu_count
-from .compare import compare_dataframes, compare_dataframes_einstein, compare_dataframes_new
+from .compare import compare_dataframes, compare_dataframes_pandas, compare_dataframes_new
 
 import pandas as pd
 import numpy as np
@@ -18,8 +18,8 @@ class Comparator:
                 args[1],
                 **self.kwargs    
             )
-        if "engine" in self.kwargs and self.kwargs["engine"] == "einstein":
-            return compare_dataframes_einstein(
+        if "engine" in self.kwargs and self.kwargs["engine"] == "pandas":
+            return compare_dataframes_pandas(
                 args[0],
                 args[1],
                 **self.kwargs    
@@ -166,7 +166,7 @@ class Validator:
                 ,**self.kwargs
             )
         if "engine" in self.kwargs and self.kwargs["engine"] == "einstein":
-            return compare_dataframes_einstein(
+            return compare_dataframes_pandas(
                 self.sources[0]
                 ,self.sources[1]
                 ,**self.kwargs

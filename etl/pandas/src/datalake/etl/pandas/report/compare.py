@@ -3,7 +3,7 @@
 from pandas import DataFrame, concat, Series
 from datetime import datetime
 
-from .check_methods import default_check
+from .methods.check_methods import default_check
 
 class ComparisonException(Exception):
     def __init__(self, *args: object) -> None:
@@ -471,7 +471,7 @@ def compare_dataframes_new(first_df: DataFrame,second_df: DataFrame, **kwargs) -
 
     return report
 
-def report_differences_einstein(key: str, differences: DataFrame, **kwargs) -> list:
+def report_differences_pandas(key: str, differences: DataFrame, **kwargs) -> list:
     df_static_data_values = "None"
     df2_static_data_values = "None"
 
@@ -515,7 +515,7 @@ def report_differences_einstein(key: str, differences: DataFrame, **kwargs) -> l
         })
     return response
 
-def compare_dataframes_einstein(first_df: DataFrame, second_df: DataFrame, **kwargs) -> DataFrame:
+def compare_dataframes_pandas(first_df: DataFrame, second_df: DataFrame, **kwargs) -> DataFrame:
     """
     Compare two DataFrames with Row per Row comparison checking columns.
 
@@ -579,7 +579,7 @@ def compare_dataframes_einstein(first_df: DataFrame, second_df: DataFrame, **kwa
         differences = first.compare(second)
         if differences.empty:
             return []
-        return report_differences_einstein(
+        return report_differences_pandas(
             key, differences, row=[
                 first, second], failindex=failindex, value_names=value_names, rename_options=rename_options, optional_data=optional_data
         )
@@ -589,13 +589,13 @@ def compare_dataframes_einstein(first_df: DataFrame, second_df: DataFrame, **kwa
         try:
             second_values = second_df.loc[k]
         except KeyError:
-            r = report_differences_einstein(k, None, failindex=failindex, value_names=value_names,
+            r = report_differences_pandas(k, None, failindex=failindex, value_names=value_names,
                                    rename_options=rename_options, error="MISSING")
             report.extend(r)
             continue
         if isinstance(second_values, DataFrame):  # we got several rows
             # First report as duplicate
-            r = report_differences_einstein(k, None, failindex=failindex, value_names=value_names,
+            r = report_differences_pandas(k, None, failindex=failindex, value_names=value_names,
                                    rename_options=rename_options, error="DUPLICATE")
             report.extend(r)
             for _, s in second_values.iterrows():
