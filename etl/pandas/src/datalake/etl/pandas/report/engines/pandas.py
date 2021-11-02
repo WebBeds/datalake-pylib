@@ -24,7 +24,7 @@ class PandasEngine(ReportingEngine):
                 if isinstance(static_columns[0], str):
                     df_static_data_values = static_data[0][static_columns[0]]
                 else:
-                    df_static_data_values = ()
+                    df_static_data_values = []
                     for i in static_columns[0]:
                         df_static_data_values.append(static_data[0][i])
 
@@ -32,7 +32,7 @@ class PandasEngine(ReportingEngine):
                 if isinstance(static_columns[1], str):
                     df2_static_data_values = static_data[1][static_columns[1]]
                 else:
-                    df2_static_data_values = ()
+                    df2_static_data_values = []
                     for i in static_columns[1]:
                         df2_static_data_values.append(static_data[1][i])
 
@@ -47,14 +47,14 @@ class PandasEngine(ReportingEngine):
         if differences is None:
             # Missing second row, return the content in kwargs["error"]
             return [{
-                "key": key, self.rename_options["column"]: "missing_second_row", "keylist": keylist, self.value_names[0]: "", self.value_names[1]: error,
+                "key": key, self.rename_options["column"]: "missing_second_row", "keylist": keylist_data, self.value_names[0]: "", self.value_names[1]: error, "static_data": [df_static_data_values, df2_static_data_values]
             }]
 
         # Build response data
         response = []
         for name, s, other in differences.itertuples():
             response.append({
-                "key": key, self.rename_options["column"]: name, "keylist": key, self.value_names[0]: s, self.value_names[1]: other,
+                "key": key, self.rename_options["column"]: name, "keylist": keylist_data, self.value_names[0]: s, self.value_names[1]: other, "static_data": [df_static_data_values, df2_static_data_values]
             })
 
         return response
@@ -111,7 +111,8 @@ class PandasEngine(ReportingEngine):
                     key=k,
                     row=[first_values, None],
                     differences=None,
-                    static_data=[first_static_df, second_static_df],
+                    static_data=[first_static_df.loc[k], None],
+                    static_columns=static,
                     keylist=keylist,
                     error="MISSING")
                 report.extend(r)
@@ -122,7 +123,8 @@ class PandasEngine(ReportingEngine):
                     key=k,
                     differences=None,
                     row=[first_values, second_values],
-                    static_data=[first_static_df, second_static_df],
+                    static_data=[first_static_df.loc[k], second_static_df.loc[k]],
+                    static_columns=static,
                     keylist=keylist,
                     error="DUPLICATE")
                 report.extend(r)
@@ -131,6 +133,9 @@ class PandasEngine(ReportingEngine):
                         key=k,
                         first=first_values,
                         second=s,
+                        static_data=[first_static_df.loc[k], second_static_df.loc[k]],
+                        static_columns=static,
+                        keylist=keylist,
                     )
                     if r:
                         report.extend(r)
@@ -138,7 +143,10 @@ class PandasEngine(ReportingEngine):
                 r = self.__compare_values__(
                     key=k,
                     first=first_values,
-                    second=second_values
+                    second=second_values,
+                    static_data=[first_static_df.loc[k], second_static_df.loc[k]],
+                    static_columns=static,
+                    keylist=keylist,
                 )
                 if r:
                     report.extend(r)

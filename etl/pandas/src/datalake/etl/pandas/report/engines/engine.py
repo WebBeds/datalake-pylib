@@ -36,19 +36,14 @@ class ReportingEngine:
         # Map dataframes
         for idx, d in enumerate([first_df, second_df]):
             dataframes.append(d["dataframe"])
-            if d["static"] != None:
-                static_values.append({
-                    "id": idx,
-                    "static": d["static"]
-                })
 
         # Lowercase colums
         for d in dataframes:
             d.columns = d.columns.str.lower()
 
         # Get static data
-        for idx, _ in enumerate(static_values):
-            static[idx] = [first_df, second_df][idx]["dataframe"].copy()
+        for idx, _ in enumerate(dataframes):
+            static[idx] = dataframes[idx].copy()
 
         # Intersection columns
         for d in dataframes:
@@ -64,6 +59,7 @@ class ReportingEngine:
         if keyindex != None and isinstance(keyindex, str):
             for idx, _ in enumerate(dataframes):
                 dataframes[idx] = dataframes[idx].set_index(keyindex)
+                static[idx] = static[idx].set_index(keyindex)
 
         dataframes.extend(static)
 
@@ -77,6 +73,6 @@ class ReportingEngine:
         failfast: bool = True,
         keyindex: str = None,
         keylist: List[str] = None,
-        static: List = None,
+        static: List = None
         ) -> DataFrame:
         pass
