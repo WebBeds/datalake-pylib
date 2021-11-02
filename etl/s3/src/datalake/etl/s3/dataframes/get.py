@@ -27,7 +27,7 @@ def get_parquet_from_s3(bucket, key, verbose=False):
     df.columns = df.columns.str.lower()
     return df
 
-def get_csv_from_s3(bucket, key, verbose=False, compression='gzip', keep_default_na=True):
+def get_csv_from_s3(bucket, key, verbose=False, compression='gzip', keep_default_na=True, sep=','):
     """
     Get CSV from S3 and return it as a Pandas DataFrame.
     """
@@ -38,7 +38,7 @@ def get_csv_from_s3(bucket, key, verbose=False, compression='gzip', keep_default
         # Connect to S3 and get object
         s3client = boto3.client('s3')
         obj = s3client.get_object(Bucket=bucket, Key=key)
-        df = pd.read_csv(io.BytesIO(obj['Body'].read()), dtype=str, compression=compression, keep_default_na=keep_default_na)
+        df = pd.read_csv(io.BytesIO(obj['Body'].read()), dtype=str, compression=compression, keep_default_na=keep_default_na, sep=sep)
     except s3client.exceptions.NoSuchKey:
         df = pd.DataFrame()
 
