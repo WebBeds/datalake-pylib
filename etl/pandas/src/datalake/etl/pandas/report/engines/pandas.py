@@ -4,7 +4,7 @@ from pandas.core.frame import DataFrame
 from pandas.core.series import Series
 from .engine import ReportingEngine
 
-class EinsteinEngine(ReportingEngine):
+class PandasEngine(ReportingEngine):
 
     def __report_differences__(self,
         key: str,

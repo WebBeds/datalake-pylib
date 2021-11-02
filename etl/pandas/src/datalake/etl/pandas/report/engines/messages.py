@@ -6,7 +6,7 @@ from .engine import ReportingEngine
 
 from ..methods.check_methods import default_check
 
-class LegacyEngine(ReportingEngine):
+class MessageEngine(ReportingEngine):
 
     def __isolate__(self,
         values: list,

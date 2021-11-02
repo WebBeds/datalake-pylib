@@ -1,6 +1,6 @@
 
-from .einstein import EinsteinEngine
-from .legacy import LegacyEngine
+from .pandas import PandasEngine
+from .messages import MessageEngine
 
 class Engines(dict):
     def __init__(self, *args, **kwargs):
@@ -9,6 +9,6 @@ class Engines(dict):
 
 # Register here the engines
 ENGINES = Engines(
-    legacy=LegacyEngine,
-    einstein=EinsteinEngine,
+    message=MessageEngine,
+    pandas=PandasEngine,
 )
