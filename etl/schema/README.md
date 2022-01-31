@@ -1,7 +1,22 @@
 # Schema Package of ETL Library
 
 **Latest release 0.1**
-## Installation
+
+## Install (pip3)
+
+Using install command:
+
+```bash
+pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema"
+```
+
+Inside requirements:
+
+```bash
+git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema
+```
+
+## Installation (gpip) (Deprecated)
 
 Using get command:
 

@@ -4,7 +4,21 @@
 
 Manage Athena and Postgres DataFrames and queries.
 
-## Install
+## Install (pip3)
+
+Using install command:
+
+```bash
+pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-database&subdirectory=etl/database"
+```
+
+Inside requirements:
+
+```bash
+git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-database&subdirectory=etl/database
+```
+
+## Install (gpip) (Deprecated)
 
 Using get command:
 

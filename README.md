@@ -4,7 +4,7 @@ Private repository for store and maintain python packages used in different repo
 
 ---
 
-## Requirements
+## Requirements (Deprecated)
 
 In order to utilize the packages that contain this repository you need to install **gpip** with **pip**, the recommended version is the 0.4.7
 

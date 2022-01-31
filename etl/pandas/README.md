@@ -2,7 +2,21 @@
 
 Make actions with Pandas DataFrames, on this version you can generate a report of the differences between two DataFrames.
 
-## Installation
+## Install (pip3)
+
+Using install command:
+
+```bash
+pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-pandas&subdirectory=etl/pandas"
+```
+
+Inside requirements:
+
+```bash
+git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-pandas&subdirectory=etl/pandas
+```
+
+## Installation (gpip) (Deprecated)
 
 Using get command:
 

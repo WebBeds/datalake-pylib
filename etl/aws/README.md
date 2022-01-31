@@ -4,7 +4,21 @@
 
 Work with AWS Services like SecretsManager and Others.
 
-## Install
+## Install (pip3)
+
+Using install command:
+
+```bash
+pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-aws&subdirectory=etl/aws"
+```
+
+Inside requirements:
+
+```bash
+git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-aws&subdirectory=etl/aws
+```
+
+## Install (gpip) (Deprecated)
 
 Using get command: (EARLY)
 
