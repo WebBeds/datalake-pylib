@@ -43,11 +43,12 @@ class Str:
 
 
 class Float:
-    def __init__(self) -> None:
+    def __init__(self, round: int = 4) -> None:
         super().__init__()
+        self.round = round
 
     def format(self, s: pd.Series) -> pd.Series:
-        return s.fillna(0).astype(np.float64)
+        return s.fillna(0).astype(np.float64).round(self.round)
 
 
 class Int:
