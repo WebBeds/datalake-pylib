@@ -21,12 +21,13 @@ class Dummy:
 
 
 class Str:
-    def __init__(self, length=0, clean=False, lower=False, upper=False) -> None:
+    def __init__(self, length=0, clean=False, lower=False, upper=False, trim=False) -> None:
         super().__init__()
         self.length = length
         self.clean = clean
         self.lower = lower
         self.upper = upper
+        self.trim = trim
 
     def format(self, s: pd.Series) -> pd.Series:
         s = s.astype(str).fillna('')
@@ -39,6 +40,8 @@ class Str:
             s = s.str.lower()
         if self.upper:
             s = s.str.upper()
+        if self.trim:
+            s = s.str.strip()
         return s
 
 
