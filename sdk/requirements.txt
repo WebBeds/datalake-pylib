@@ -1,0 +1,2 @@
+git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema
+requests >= 2.22.0
