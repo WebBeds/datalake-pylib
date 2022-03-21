@@ -4,4 +4,4 @@
 from .master import MasterFetcher
 
 # Hotel Fetcher
-from .hotel import HotelFetcher, Hotel
+from .hotel import Hotels, Hotel

@@ -1,5 +1,5 @@
 from datalake.sdk import Client
-from .hotel import HotelFetcher
+from .hotel import Hotels
 
 class MasterFetcher:
 
@@ -10,7 +10,7 @@ class MasterFetcher:
         self._client = client
         self._fetchers = {}
 
-    def hotels(self) -> HotelFetcher:
+    def hotels(self) -> Hotels:
         if 'hotels' not in self._fetchers:
-            self._fetchers['hotels'] = HotelFetcher(self._client._session)
+            self._fetchers['hotels'] = Hotels(self._client._session)
         return self._fetchers['hotels']

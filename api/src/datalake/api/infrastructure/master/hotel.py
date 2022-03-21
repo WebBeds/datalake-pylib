@@ -1,7 +1,7 @@
 from datalake.sdk.service import Service
 from datalake.api.models import Hotel
 
-class HotelFetcher(Service):
+class Hotels(Service):
 
     _base = '/master/hotels'
     
@@ -24,7 +24,7 @@ class HotelFetcher(Service):
             )
         )
     
-    def get_export(self, platform: str, id: str = "", page: int = 0, page_size: int = 10000):
+    def get_export(self, platform: str, id: str = "", page: int = 0, page_size: int = 10000, delete: bool = True):
         return self.__fetch_file__(
             method='GET',
             url=f"{self._base}/export",
@@ -35,6 +35,7 @@ class HotelFetcher(Service):
                 'page': page,
                 'pagesize': page_size,
             },
+            delete=delete
         )
         
     def from_id(self, platform: str, id):

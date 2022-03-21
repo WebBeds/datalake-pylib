@@ -3,7 +3,6 @@ from requests import request as rq
 
 import json
 import tempfile
-import pandas
 
 from .collection import Collection
 from .session import Session
@@ -40,7 +39,7 @@ class Service:
             collection.append(self.__entity__()(hotel))
         return collection
 
-    def __fetch_file__(self, method: str, url: str, result_str: str, params: dict = {}, headers: dict = {}) -> File:
+    def __fetch_file__(self, method: str, url: str, result_str: str, params: dict = {}, headers: dict = {}, delete: bool = True) -> File:
         
         # Make request to obtain file url.
         resp = self.__fetch__(
@@ -63,13 +62,13 @@ class Service:
         file_url = result[result_str]
         file: File = None
 
-        with tempfile.NamedTemporaryFile() as file_name:
+        with tempfile.NamedTemporaryFile(delete=delete) as file_name:
             with open(file_name.name, 'wb') as f:
                 # Obtain file content
                 f.write(rq(method="GET", url=file_url).content)
                 f.close()
             # Read file as csv
-            file = File(df=pandas.read_csv(file_name.name))
+            file = File(path=file_name.name, read=delete)
             f.close()
 
         return file
