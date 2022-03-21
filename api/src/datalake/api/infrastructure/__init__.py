@@ -1,1 +1,1 @@
-from .master import *
+from .master import MasterFetcher
