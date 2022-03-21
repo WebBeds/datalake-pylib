@@ -2,10 +2,8 @@
 # DataLake SDK              #
 # ========================= #
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 from .collection import Collection
 from .session import Session
-
-from .service import *
-from .entities import *
+from .client import Client

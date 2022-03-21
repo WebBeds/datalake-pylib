@@ -1,5 +1,3 @@
-from typing import List
-from .entities.entity import Entity
 from pandas import json_normalize
 
 from datalake.etl import (
@@ -8,11 +6,12 @@ from datalake.etl import (
 
 class Collection(list):
     _schema: dict = None
+    def set_schema(self, schema: dict):
+        self._schema = schema
     def to_dataframe(self):
         collection = []
-        schema = None
         for entity in self:
-            if schema is None:
-                schema = entity.get_schema()
             collection.append(entity.__dict__)
-        return sch.normalize_df(json_normalize(collection), schema)
+        if self._schema is None:
+            return json_normalize(collection)
+        return sch.normalize_df(json_normalize(collection), self._schema)
