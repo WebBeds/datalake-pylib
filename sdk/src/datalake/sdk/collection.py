@@ -9,9 +9,6 @@ class Collection(list):
     def set_schema(self, schema: dict):
         self._schema = schema
     def to_dataframe(self):
-        collection = []
-        for entity in self:
-            collection.append(entity.__dict__)
         if self._schema is None:
-            return json_normalize(collection)
-        return sch.normalize_df(json_normalize(collection), self._schema)
+            return json_normalize(self)
+        return sch.normalize_df(json_normalize(self), self._schema)
