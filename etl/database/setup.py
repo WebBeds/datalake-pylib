@@ -56,6 +56,6 @@ setup(
 		"psycopg2_binary==2.8.6",
 		"pandas==1.2.4",
 		"numpy==1.19.4",
-		"PyAthena==1.10.8"
+		"PyAthena>=1.10.8"
 	]
 )
