@@ -4,7 +4,7 @@ from datalake.api.models import MPAExecution
 
 class Executions(Service):
 
-    _base = "project/mpa/executions"
+    _base = "/project/mpa/executions"
 
     def __entity__(self):
         return MPAExecution

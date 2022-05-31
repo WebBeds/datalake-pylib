@@ -1,12 +1,14 @@
 from datalake.sdk import Client
 
 from .infrastructure.master import MasterFetcher
+from .infrastructure.projects.mpa import MPAFetcher
 
 class APIClient(Client):
     
     def __register__(self) -> None:
         # Master Fetcher
         self._services['master'] = MasterFetcher(self)
+        self._services['mpa'] = MPAFetcher(self)
 
     def add_resource(self, name: str, resource: object):
         if name in self._services:
