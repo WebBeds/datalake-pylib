@@ -1,14 +1,7 @@
-from datalake.sdk import Client
+from .. import Fetcher
 from .hotel import Hotels
 
-class MasterFetcher:
-
-    _client: Client = None
-    _fetchers: dict = None
-
-    def __init__(self, client: Client):
-        self._client = client
-        self._fetchers = {}
+class MasterFetcher(Fetcher):
 
     def hotels(self) -> Hotels:
         if 'hotels' not in self._fetchers:
