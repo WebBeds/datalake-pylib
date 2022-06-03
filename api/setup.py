@@ -52,6 +52,6 @@ setup(
 	),
 	python_requires=">=3.7",
     install_requires=[
-		"datalake-sdk @ git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-sdk&subdirectory=sdk"
+		"datalake-sdk @ git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-sdk&subdirectory=sdk"
 	],
 )
