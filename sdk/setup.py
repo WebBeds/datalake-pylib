@@ -54,6 +54,6 @@ setup(
 	python_requires=">=3.7",
     install_requires=[
 		"requests==2.22.0",
-		"datalake-etl-schema @ git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema"
+		"datalake-etl-schema @ git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema"
 	],
 )

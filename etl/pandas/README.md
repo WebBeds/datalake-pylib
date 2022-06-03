@@ -7,13 +7,13 @@ Make actions with Pandas DataFrames, on this version you can generate a report o
 Using install command:
 
 ```bash
-pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-pandas&subdirectory=etl/pandas"
+pip3 install "git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-pandas&subdirectory=etl/pandas"
 ```
 
 Inside requirements:
 
 ```bash
-git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-pandas&subdirectory=etl/pandas
+git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-pandas&subdirectory=etl/pandas
 ```
 
 ## Installation (gpip) (Deprecated)

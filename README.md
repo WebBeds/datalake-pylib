@@ -1,4 +1,4 @@
-# **Datalake Python Library**
+# **DataLake Python Library**
 
 Private repository for store and maintain python packages used in different repositories of Datalake.
 

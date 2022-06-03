@@ -9,13 +9,13 @@ Work with AWS Services like SecretsManager and Others.
 Using install command:
 
 ```bash
-pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-aws&subdirectory=etl/aws"
+pip3 install "git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-aws&subdirectory=etl/aws"
 ```
 
 Inside requirements:
 
 ```bash
-git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-aws&subdirectory=etl/aws
+git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-aws&subdirectory=etl/aws
 ```
 
 ## Install (gpip) (Deprecated)

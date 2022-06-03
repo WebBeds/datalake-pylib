@@ -7,13 +7,13 @@
 Using install command:
 
 ```bash
-pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema"
+pip3 install "git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema"
 ```
 
 Inside requirements:
 
 ```bash
-git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema
+git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-schema&subdirectory=etl/schema
 ```
 
 ## Installation (gpip) (Deprecated)

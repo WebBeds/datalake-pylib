@@ -9,13 +9,13 @@ Manage and obtain data from DataLake API.
 Using install command:
 
 ```bash
-pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-api&subdirectory=api"
+pip3 install "git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-api&subdirectory=api"
 ```
 
 Inside requirements:
 
 ```bash
-git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-api&subdirectory=api
+git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-api&subdirectory=api
 ```
 
 ## Import

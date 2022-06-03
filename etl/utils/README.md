@@ -7,13 +7,13 @@ Get some utilities used along the ETL repository.
 Using install command:
 
 ```bash
-pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-utils&subdirectory=etl/utils"
+pip3 install "git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-utils&subdirectory=etl/utils"
 ```
 
 Inside requirements:
 
 ```bash
-git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-utils&subdirectory=etl/utils
+git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-utils&subdirectory=etl/utils
 ```
 
 ## Install (gpip) (Deprecated)

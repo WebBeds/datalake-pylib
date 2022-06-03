@@ -7,13 +7,13 @@ Manage S3 Objets and use with Pandas DataFrames.
 Using install command:
 
 ```bash
-pip3 install "git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-s3&subdirectory=etl/s3"
+pip3 install "git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-s3&subdirectory=etl/s3"
 ```
 
 Inside requirements:
 
 ```bash
-git+ssh://github.com/Webjet/datalake-pylib#egg=datalake-etl-s3&subdirectory=etl/s3
+git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-s3&subdirectory=etl/s3
 ```
 
 ## Install (gpip) (Deprecated)
