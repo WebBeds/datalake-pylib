@@ -53,7 +53,7 @@ setup(
 	),
 	python_requires=">=3.6",
     install_requires=[
-		"pandas==1.2.4",
-		"numpy==1.19.4"
+		"pandas>=1.2.4",
+		"numpy>=1.19.4"
 	]
 )

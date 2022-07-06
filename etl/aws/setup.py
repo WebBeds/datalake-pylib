@@ -51,8 +51,8 @@ setup(
 	),
 	python_requires=">=3.6",
     install_requires=[
-        "botocore==1.19.52",
-		"boto3==1.16.45",
-		"s3fs==0.5.2"
+        "botocore>=1.19.52",
+		"boto3>=1.16.45",
+		"s3fs>=0.5.2"
 	]
 )
