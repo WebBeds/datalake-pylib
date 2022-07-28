@@ -2,6 +2,8 @@
 
 import boto3
 import os
+import re
+import awswrangler as wr
 
 def move_file(origin_bucket: str, origin_key: str, destination_bucket: str, destination_key: str, delete: bool = True, verbose: bool = False, dry: bool = False, s3_client = None) -> None:
     """
@@ -38,3 +40,48 @@ def move_file(origin_bucket: str, origin_key: str, destination_bucket: str, dest
     # Delete original
     if delete:
         s3.Object(origin_bucket,origin_key).delete()
+
+def safe_delete(
+    bucket: str,
+    prefix: str,
+    suffix: str,
+    limit: int = 0,
+    verbose: bool = False,
+    dry: bool = False,
+    session = None
+):
+
+    if not bucket or len(bucket) < 3:
+        raise ValueError("Bucket name is required and must be at least 3 characters long.")
+    if not prefix or len(prefix) < 3:
+        raise ValueError("Prefix is required and must be at least 3 characters long.")
+    if not suffix or len(suffix) < 3:
+        raise ValueError("Suffix is required and must be at least 3 characters long.")
+
+    path = f"s3://{bucket}/{prefix}"
+    objs = wr.s3.list_objects(
+        path=path,
+        suffix=suffix,
+        boto3_session=session
+    )
+
+    if len(objs) == 0:
+        return
+    if limit > 0 and len(objs) > limit:
+        raise Exception(f"Too many objects found at {path}")
+
+    regex = re.compile(f"{re.escape(prefix)}.*{re.escape(suffix)}$")
+    for obj in objs:
+        if not regex.search(obj):
+            raise Exception(f"Object {obj} does not match pattern {prefix}*{suffix}")
+
+    if verbose:
+        print(f"Deleting {len(objs)} objects matching {prefix}*{suffix} on {path}, dry={dry}")
+
+    if dry:
+        return
+
+    wr.s3.delete_objects(
+        path=objs,
+        boto3_session=session
+    )
