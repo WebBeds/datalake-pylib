@@ -1,4 +1,5 @@
 from awswrangler.athena import read_sql_query
+import logging
 
 def read_sql_query_with_retry(
     max_retries: int = 3,
@@ -14,10 +15,19 @@ def read_sql_query_with_retry(
     """
     if max_retries < 1:
         raise ValueError('max_retries must be greater than 0.')
-    for retry in range(max_retries):
+
+    logging.debug(f'Reading SQL query with retry. max_retries: {max_retries}')
+    logging.debug(f'kwargs: {kwargs}')
+
+    r = 0
+    ex = None
+    while r <= max_retries:
         try:
-            dfs = read_sql_query(**kwargs)
-            return dfs
+            logging.debug(f'Reading SQL query with retry. Attempt: {r}')
+            return read_sql_query(**kwargs)
         except Exception as e:
-            if retry == (max_retries - 1):
-                raise e
+            logging.debug(f'Reading SQL query with retry. Exception: {e}')
+            r += 1
+            ex = e    
+    raise RuntimeError(f'maximum number of retries ({max_retries}) reached', ex)
+            
