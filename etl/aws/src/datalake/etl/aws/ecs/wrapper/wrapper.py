@@ -44,19 +44,25 @@ def parse_os_arguments() -> dict:
 
     class ParsedTimeSeconds(Schema):
         def parse(self, input):
-            if not isinstance(input, str):
+            try:
+                if not isinstance(input, str):
+                    return input
+                return str(int(datetime.strptime(
+                    input, '%Y-%m-%dT%H:%M:%S.%fZ'
+                ).timestamp()))
+            except Exception:
                 return input
-            return str(int(datetime.strptime(
-                input, '%Y-%m-%dT%H:%M:%S.%fZ'
-            ).timestamp()))
 
     class ParsedTimeMilliseconds(Schema):
         def parse(self, input):
-            if not isinstance(input, str):
+            try:
+                if not isinstance(input, str):
+                    return input
+                return str(datetime.strptime(
+                    input, '%Y-%m-%dT%H:%M:%S.%fZ'
+                ).timestamp())
+            except Exception:
                 return input
-            return str(datetime.strptime(
-                input, '%Y-%m-%dT%H:%M:%S.%fZ'
-            ).timestamp())
 
     class OSArgument:
         def __init__(self, key, default = None) -> None:
