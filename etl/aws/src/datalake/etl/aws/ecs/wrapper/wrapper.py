@@ -343,3 +343,6 @@ def main() -> None:
 
     if not args.dry:
         _ = metrics.send()
+
+    # NOTE: Return exit code to caller
+    exit(exit_code)
