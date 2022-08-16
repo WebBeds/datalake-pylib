@@ -262,16 +262,13 @@ def main() -> None:
     request_b64 = base64.b64encode(json.dumps(request).encode('utf-8'))
     logging.info("REQ: {0}".format(request_b64.decode('utf-8')))
 
-    logging.info("MTS: {0}".format({
-        'namespace': config['metrics']['namespace'],
-        'region': config['metrics']['region'],
-    }))
     metrics = WrapperMetrics(
         namespace=config['metrics']['namespace'],
         team=config['metrics']['team'],
         group=cli['group'],
         aws_region=config['metrics']['region']
     )
+    logging.info("MTS: {0}".format(metrics))
 
     metrics.add(SingleMetric(
         metric_name='Start',

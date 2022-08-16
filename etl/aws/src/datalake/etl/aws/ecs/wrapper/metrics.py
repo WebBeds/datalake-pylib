@@ -50,3 +50,6 @@ class WrapperMetrics:
         self._metrics = []
         logging.debug(resp)
         return resp
+
+    def __str__(self) -> str:
+        return "WrapperMetrics({0}, {1}, {2}, {3})".format(self.namespace, self.team, self.group, self.aws_region)
