@@ -38,6 +38,26 @@ def parse_arguments() -> argparse.Namespace:
 
 def parse_os_arguments() -> dict:
     
+    class Schema:
+        def parse(self, input) -> str:
+            pass
+
+    class ParsedTimeSeconds(Schema):
+        def parse(self, input):
+            if not isinstance(input, str):
+                return input
+            return str(int(datetime.strptime(
+                input, '%Y-%m-%dT%H:%M:%S.%fZ'
+            ).timestamp()))
+
+    class ParsedTimeMilliseconds(Schema):
+        def parse(self, input):
+            if not isinstance(input, str):
+                return input
+            return str(datetime.strptime(
+                input, '%Y-%m-%dT%H:%M:%S.%fZ'
+            ).timestamp())
+
     class OSArgument:
         def __init__(self, key, default = None) -> None:
             self.key=key
@@ -46,12 +66,35 @@ def parse_os_arguments() -> dict:
             if not input or (input and key not in input):
                 return self.default
             return input[key]
+        
+    class OSParsedArgument:
+        def __init__(self, key, search_key: str = None, schema: Schema = None, default = None) -> None:
+            self.key=key
+            self.search_key=search_key
+            self.schema=schema
+            self.default=default
+        def parse(self, key, input):
+            if not input or (input and key not in input and (self.search_key and self.search_key not in input)):
+                return self.default
+            return input[key] if not self.schema else self.schema.parse(input[key]) \
+                if not self.search_key \
+                else input[self.search_key] if not self.schema else self.schema.parse(input[self.search_key])
 
     args = [
         OSArgument('AWS_EXECUTION_ARN', None),
         OSArgument('AWS_EXECUTION_START', None),
         OSArgument('AWS_STATE_MACHINE_ID', None),
         OSArgument('AWS_STATE_ENTERED', None),
+        OSParsedArgument('CreationTimestampSeconds', 
+            search_key='AWS_EXECUTION_START',
+            schema=ParsedTimeSeconds(),
+            default=None,
+        ),
+        OSParsedArgument('CreationTimestampMilliseconds', 
+            search_key='AWS_EXECUTION_START', 
+            schema=ParsedTimeMilliseconds(),
+            default=None,
+        ),
     ]
 
     return {
