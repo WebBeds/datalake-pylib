@@ -354,7 +354,7 @@ def main() -> None:
         SingleMetric(
             metric_name='Exit',
             dimensions=get_dimensions(cli['job'], metrics),
-            value=exit_code,
+            value=0 if exit_code == 0 else 1,
         ),
         SingleMetric(
             metric_name='End',
