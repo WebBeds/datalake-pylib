@@ -219,7 +219,7 @@ def main() -> None:
 
     request_uuid = uuid.uuid4()
     if "ExecutionId" in oenv and oenv["ExecutionId"]:
-        request_uuid = uuid.UUID(oenv["ExecutionId"])
+        request_uuid = oenv["ExecutionId"]
 
     now = datetime.utcnow()
 
