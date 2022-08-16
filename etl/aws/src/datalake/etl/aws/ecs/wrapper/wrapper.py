@@ -12,6 +12,7 @@ import time
 import uuid
 import sys
 import os
+import re
 
 DEFAULT_CONFIG = "wrapper.conf"
 
@@ -118,13 +119,24 @@ def parse_cli_arguments(
         arg.key: arg.parse(arg.key, cli_json) for arg in args
     }
 
-def get_command(entrypoint: list, command: list) -> list:
+def parse_command(commands: list, oenv: dict) -> list:
+    for idx, command in enumerate(commands):
+        r = re.compile(r'\$\{\{(.*?)\}\}')
+        s = r.search(command)
+        if not s:
+            continue
+        if s.group(1) not in oenv:
+            continue
+        commands[idx] = r.sub(lambda x: oenv[x.group(1)], command)
+    return commands
+
+def get_command(entrypoint: list, command: list, oenv: dict = None) -> list:
     cmd = []
     if entrypoint and len(entrypoint) > 0:
         cmd.extend(entrypoint)
     if command and len(command) > 0:
         cmd.extend(command)
-    return cmd
+    return parse_command(cmd, oenv)
 
 def main() -> None:
 
@@ -154,7 +166,7 @@ def main() -> None:
     logging.info("CFG: {0}".format(config))
     logging.info("CLI: {0}".format(cli))
 
-    cmd = get_command(cli['entrypoint'], cli['command'])
+    cmd = get_command(cli['entrypoint'], cli['command'], oenv)
     logging.info("CMD: {0}".format(cmd))
 
     request = {
