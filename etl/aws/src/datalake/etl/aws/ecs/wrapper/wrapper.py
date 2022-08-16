@@ -35,6 +35,28 @@ def parse_arguments() -> argparse.Namespace:
 
     return parser.parse_args()
 
+def parse_os_arguments() -> dict:
+    
+    class OSArgument:
+        def __init__(self, key, default = None) -> None:
+            self.key=key
+            self.default=default
+        def parse(self, key, input):
+            if not input or (input and key not in input):
+                return self.default
+            return input[key]
+
+    args = [
+        OSArgument('AWS_EXECUTION_ARN', None),
+        OSArgument('AWS_EXECUTION_START', None),
+        OSArgument('AWS_STATE_MACHINE_ID', None),
+        OSArgument('AWS_STATE_ENTERED', None),
+    ]
+
+    return {
+        arg.key: arg.parse(arg.key, os.environ) for arg in args
+    }
+
 def parse_config(config_file: str) -> configparser.ConfigParser:
 
     config = None
@@ -107,6 +129,7 @@ def get_command(entrypoint: list, command: list) -> list:
 def main() -> None:
 
     args = parse_arguments()
+    oenv = parse_os_arguments()
 
     request_uuid = uuid.uuid4()
     now = datetime.utcnow()
@@ -119,6 +142,7 @@ def main() -> None:
     logging.info("HTN: {0}".format(socket.gethostname()))
     logging.info("UID: {0}".format(request_uuid))
     logging.info("ARV: {0}".format(sys.argv))
+    logging.info("OSV: {0}".format(oenv))
 
     config = parse_config(args.config)
     cli = parse_cli_arguments(
@@ -137,6 +161,7 @@ def main() -> None:
         'uuid': str(request_uuid),
         'host': socket.gethostname(),
         'args': sys.argv,
+        'oenv': oenv,
         'config': config,
         'cli': cli,
         'cmd': cmd,
