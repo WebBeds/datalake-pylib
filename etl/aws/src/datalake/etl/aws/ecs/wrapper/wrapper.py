@@ -346,6 +346,12 @@ def main() -> None:
 
     metrics.add(
         SingleMetric(
+            metric_name='Duration',
+            dimensions=get_dimensions(cli['job'], metrics),
+            value=int(round(end - start, 0)),
+            unit='Seconds',
+        ),
+        SingleMetric(
             metric_name='Exit',
             dimensions=get_dimensions(cli['job'], metrics),
             value=exit_code,
