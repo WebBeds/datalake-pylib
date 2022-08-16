@@ -64,6 +64,15 @@ def parse_os_arguments() -> dict:
             except Exception:
                 return input
 
+    class ParsedExecutionIdArn(Schema):
+        def parse(self, input):
+            try:
+                if not isinstance(input, str):
+                    return input
+                return input.split(':')[-1]
+            except Exception:
+                return input
+
     class OSArgument:
         def __init__(self, key, default = None) -> None:
             self.key=key
@@ -101,6 +110,11 @@ def parse_os_arguments() -> dict:
             schema=ParsedTimeMilliseconds(),
             default=None,
         ),
+        OSParsedArgument('ExecutionId',
+            search_key='AWS_EXECUTION_ARN',
+            schema=ParsedExecutionIdArn(),
+            default=None,
+        )
     ]
 
     return {
@@ -193,6 +207,9 @@ def main() -> None:
     oenv = parse_os_arguments()
 
     request_uuid = uuid.uuid4()
+    if "ExecutionId" in oenv:
+        request_uuid = uuid.UUID(oenv["ExecutionId"])
+
     now = datetime.utcnow()
 
     logging.basicConfig(
