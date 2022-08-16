@@ -144,6 +144,8 @@ def parse_config(config_file: str) -> configparser.ConfigParser:
         ],
         'metrics': [
             ConfigArgument('namespace'),
+            ConfigArgument('team'),
+            ConfigArgument('group'),
             ConfigArgument('region', default='eu-west-1'),
             ConfigArgument('rate', default=60)
         ]
@@ -157,7 +159,8 @@ def parse_config(config_file: str) -> configparser.ConfigParser:
 
 def parse_cli_arguments(
     cli_json: dict,
-    default_entrypoint = None
+    default_entrypoint = None,
+    default_group = None,
 ) -> dict:
 
     class CLIArgument:
@@ -176,6 +179,7 @@ def parse_cli_arguments(
         CLIArgument('entrypoint', default_entrypoint, list),
         CLIArgument('command', [], list),
         CLIArgument('job', None, str),
+        CLIArgument('group', default_group, str),
     ]
 
     return {
@@ -201,13 +205,20 @@ def get_command(entrypoint: list, command: list, oenv: dict = None) -> list:
         cmd.extend(command)
     return parse_command(cmd, oenv)
 
+def get_dimensions(job: str, metrics: WrapperMetrics) -> dict:
+    return {
+        'Team': metrics.team,
+        'Group': metrics.group,
+        'Job': job,
+    }
+
 def main() -> None:
 
     args = parse_arguments()
     oenv = parse_os_arguments()
 
     request_uuid = uuid.uuid4()
-    if "ExecutionId" in oenv:
+    if "ExecutionId" in oenv and oenv["ExecutionId"]:
         request_uuid = uuid.UUID(oenv["ExecutionId"])
 
     now = datetime.utcnow()
@@ -225,7 +236,8 @@ def main() -> None:
     config = parse_config(args.config)
     cli = parse_cli_arguments(
         args.cli_json,
-        default_entrypoint=config['wrapper']['entrypoint']
+        default_entrypoint=config['wrapper']['entrypoint'],
+        default_group=config['metrics']['group'],
     )
 
     logging.info("ARG: {0}".format(args))
@@ -256,14 +268,14 @@ def main() -> None:
     }))
     metrics = WrapperMetrics(
         namespace=config['metrics']['namespace'],
+        team=config['metrics']['team'],
+        group=cli['group'],
         aws_region=config['metrics']['region']
     )
 
     metrics.add(SingleMetric(
         metric_name='Start',
-        dimensions={
-            'Job': cli['job'],
-        },
+        dimensions=get_dimensions(cli['job'], metrics),
         value=1,
     ))
     if not args.dry:
@@ -283,9 +295,7 @@ def main() -> None:
         while not e.is_set():
             m = SingleMetric(
                 metric_name='Duration',
-                dimensions={
-                    'Job': job,
-                },
+                dimensions=get_dimensions(job, metrics),
                 value=int(round(time.time() - start, 0)),
                 unit='Seconds',
             )
@@ -313,16 +323,12 @@ def main() -> None:
         metrics.add(
             SingleMetric(
                 metric_name='Exit',
-                dimensions={
-                    'Job': cli['job'],
-                },
+                dimensions=get_dimensions(cli['job'], metrics),
                 value=1,
             ),
             SingleMetric(
                 metric_name='End',
-                dimensions={
-                    'Job': cli['job'],
-                },
+                dimensions=get_dimensions(cli['job'], metrics),
                 value=1,
             )
         )
@@ -344,16 +350,12 @@ def main() -> None:
     metrics.add(
         SingleMetric(
             metric_name='Exit',
-            dimensions={
-                'Job': cli['job'],
-            },
+            dimensions=get_dimensions(cli['job'], metrics),
             value=exit_code,
         ),
         SingleMetric(
             metric_name='End',
-            dimensions={
-                'Job': cli['job'],
-            },
+            dimensions=get_dimensions(cli['job'], metrics),
             value=1,
         )
     )

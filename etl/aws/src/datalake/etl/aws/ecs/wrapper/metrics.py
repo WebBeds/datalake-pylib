@@ -21,8 +21,10 @@ class SingleMetric:
 
 class WrapperMetrics:
 
-    def __init__(self, namespace: str, aws_region: str = AWS_REGION,client: boto3.client = None) -> None:
+    def __init__(self, namespace: str, team: str, group: str, aws_region: str = AWS_REGION,client: boto3.client = None) -> None:
         self.namespace = namespace
+        self.team=team
+        self.group=group
         self.aws_region = aws_region
         self.client = client
         self._metrics = []
@@ -36,7 +38,7 @@ class WrapperMetrics:
             yield m
 
     def send(self):
-        if not self.namespace:
+        if not self.namespace or not self.team or not self.group:
             return
         if not self.client:
             self.client = boto3.client('cloudwatch', region_name=self.aws_region)
