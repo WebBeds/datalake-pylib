@@ -324,6 +324,13 @@ def main() -> None:
                 value=1,
             ),
             SingleMetric(
+                metric_name='Exit',
+                dimensions={
+                    'Team': metrics.team
+                },
+                value=1,
+            ),
+            SingleMetric(
                 metric_name='End',
                 dimensions=get_dimensions(cli['job'], metrics),
                 value=1,
@@ -354,6 +361,13 @@ def main() -> None:
         SingleMetric(
             metric_name='Exit',
             dimensions=get_dimensions(cli['job'], metrics),
+            value=0 if exit_code == 0 else 1,
+        ),
+        SingleMetric(
+            metric_name='Exit',
+            dimensions={
+                'Team': metrics.team
+            },
             value=0 if exit_code == 0 else 1,
         ),
         SingleMetric(
