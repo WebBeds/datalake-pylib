@@ -50,11 +50,13 @@ setup(
 		exclude=["test","scripts"],
 	),
 	scripts=[
-		"bin/twrap"
+		"bin/twrap",
+		"bin/twatch",
 	],
 	python_requires=">=3.6",
     install_requires=[
 		"boto3>=1.16.45",
 		"s3fs>=0.4.2",
+		"awswrangler>=2.16.1"
 	]
 )

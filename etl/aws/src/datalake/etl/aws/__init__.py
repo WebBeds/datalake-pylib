@@ -7,5 +7,6 @@ __version__ = "0.1"
 from . import (
     awslambda,
     secretsmanager,
-    ecs
+    ecs,
+    cloudwatch
 )
