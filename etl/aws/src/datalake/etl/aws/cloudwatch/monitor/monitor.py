@@ -10,6 +10,7 @@ import sys
 import os
 
 DEFAULT_CONFIG = "monitor.conf"
+DEFAULT_VALUE = 7 * 24 * 60 * 60
 DEFAULT_ATHENA_KWARGS = {
     "database": "default",
     "ctas_approach": False
@@ -22,6 +23,7 @@ class Monitor:
     unit: str
     sql: str
     athena_kwargs: dict = None
+    default_value: float = DEFAULT_VALUE
 
     def _process_dimensions(
         self,
@@ -50,6 +52,8 @@ class Monitor:
         if df.empty:
             logging.warning("No data returned from query")
             return
+
+        df[self.name.lower()] = df[self.name.lower()].fillna(self.default_value)
 
         for _, row in df.iterrows():
             m = SingleMetric(
