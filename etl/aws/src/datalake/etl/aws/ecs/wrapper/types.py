@@ -13,8 +13,10 @@ class Argument:
     default: Any = None
 
     def parse(self, input) -> Any:
-        if not input or ((input and self.key not in input) or (self.search_key and self.search_key not in input)):
+        if not input: 
             return self.schema.parse(self.default)
+        if self.key in input:
+            return self.schema.parse(input[self.key])
         if self.search_key and self.search_key in input:
             return self.schema.parse(input[self.search_key])
-        return self.schema.parse(input[self.key])
+        return self.schema.parse(self.default)
