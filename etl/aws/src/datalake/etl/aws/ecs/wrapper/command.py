@@ -1,5 +1,6 @@
 import awswrangler as wr
 import logging
+import json
 import re
 
 pattern = re.compile(r'\$\{\{(.*?)\}\}')
@@ -19,11 +20,28 @@ def parse_plugin(
     # ==========================
 
     if plugin == "secretsmanager":
+
+        secret_search_key = "value"
+        secret_format = "plain"
+
+        if len(value.split(";")) > 1:
+            # value;type;search_key
+            secret_format = value.split(";")[1]
+            secret_search_key = value.split(";")[2]
+            value = value.split(";")[0]
+
         logging.debug(f"SECRETSMANAGER: getting value {value}")
         try:
-            return wr.secretsmanager.get_secret(
+            s = wr.secretsmanager.get_secret(
                 value
             )
+            # Parse format
+            if secret_format == "json":
+                s = json.loads(s)                
+            # Parse search key
+            if secret_format == "json" and secret_search_key in s:
+                return s[secret_search_key]
+            return s
         except:
             logging.debug(f"SECRETSMANAGER: failed to get value {value}")
             return None
@@ -42,6 +60,7 @@ def parse_plugins(
         o = parse_plugin(plugin, s.group(1), oenv)
         if not o:
             continue
+        return o
     return None
 
 def parse_command(
