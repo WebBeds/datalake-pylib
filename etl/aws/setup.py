@@ -57,6 +57,7 @@ setup(
     install_requires=[
 		"boto3>=1.16.45",
 		"s3fs>=0.4.2",
-		"awswrangler>=2.16.1"
+		"awswrangler>=2.16.1",
+		"requests>=2.28.0"
 	]
 )

@@ -121,6 +121,10 @@ def parse_cli(
             schema=ParsedCLIArgument(arg_type=str),
             default=default_group,
         ),
+        Argument('actions',
+            schema=ParsedCLIArgument(arg_type=list),
+            default=[],
+        )
     ]
 
     return {

@@ -4,7 +4,6 @@ import base64
 import signal 
 import socket
 import json
-import time
 import uuid
 import sys
 
@@ -26,6 +25,12 @@ from .metrics import (
 
 from .process import (
     WrapperProcess
+)
+
+from .actions import (
+    WrapperActions,
+    START,
+    END
 )
 
 def get_dimensions(job: str, metrics: WrapperMetrics) -> dict:
@@ -96,6 +101,12 @@ def main() -> None:
     )
     logging.info("MTS: {0}".format(metrics))
 
+    actions = WrapperActions.parse(
+        actions=cli['actions'],
+        oenv=oenv,
+    )
+    logging.info("ACT: {0}".format(actions))
+
     metrics.add(SingleMetric(
         metric_name='Start',
         dimensions=get_dimensions(cli['job'], metrics),
@@ -117,7 +128,10 @@ def main() -> None:
     for sig in signals_to_handle: 
         signal.signal(sig, proc.signal_handler)
 
-    # TODO: Add actions to be performed on start
+    actions.execute(
+        stage=START,
+        dry=args.dry
+    )
 
     # NOTE: Run Process
     exit_code, duration, p = proc.run(dry=args.dry)
@@ -156,7 +170,10 @@ def main() -> None:
     if not args.dry:
         _ = metrics.send()
 
-    # TODO: Add actions to be performed on exit
+    actions.execute(
+        stage=END,
+        dry=args.dry
+    )
 
     # NOTE: Return exit code to caller
     exit(exit_code)
