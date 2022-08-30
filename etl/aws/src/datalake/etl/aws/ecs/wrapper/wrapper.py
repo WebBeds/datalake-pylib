@@ -28,7 +28,7 @@ from .process import (
 )
 
 from .actions import (
-    WrapperActions,
+    parse_actions,
     START,
     END
 )
@@ -101,9 +101,9 @@ def main() -> None:
     )
     logging.info("MTS: {0}".format(metrics))
 
-    actions = WrapperActions.parse(
+    actions = parse_actions(
         actions=cli['actions'],
-        oenv=oenv,
+        oenv=oenv
     )
     logging.info("ACT: {0}".format(actions))
 
