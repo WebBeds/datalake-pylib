@@ -93,23 +93,24 @@ class ArrayInt:
 
 
 class Time:
-    def __init__(self, infer=True, utc=False) -> None:
+    def __init__(self, infer=True, utc=False, unit: str = 'ns') -> None:
         super().__init__()
         self.utc = utc
         self.infer = infer
+        self.unit = unit
 
     def format(self, s: pd.Series) -> pd.Series:
         if not is_datetime64_any_dtype(s):
             if self.infer:
-                s = pd.to_datetime(s, infer_datetime_format=True, utc=self.utc)
+                s = pd.to_datetime(s, infer_datetime_format=True, utc=self.utc, unit=self.unit)
             else:
-                s = pd.to_datetime(s, format='%Y-%m-%dT%H:%M:%SZ', utc=self.utc, errors='coerce')
+                s = pd.to_datetime(s, format='%Y-%m-%dT%H:%M:%SZ', utc=self.utc, errors='coerce', unit=self.unit)
         elif self.utc:
-            s = pd.to_datetime(s, infer_datetime_format=True, utc=True)
+            s = pd.to_datetime(s, infer_datetime_format=True, utc=True, unit=self.unit)
 
         if self.utc and str(s.dtypes) != str(pd.DatetimeTZDtype(tz='UTC')):
             print(f"WARNING: time was not in UTC {s.dtypes}")
-            s = s.map(lambda x: x if x.tzinfo is not None else pd.to_datetime(x).tz_localize('UTC'))
+            s = s.map(lambda x: x if x.tzinfo is not None else pd.to_datetime(x, unit=self.unit).tz_localize('UTC'))
         return s
 
 
