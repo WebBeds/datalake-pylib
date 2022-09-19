@@ -170,6 +170,12 @@ def main() -> None:
     if not args.dry:
         _ = metrics.send()
 
+    # NOTE: Update oenv with process data.
+    actions.oenv.update({
+        'ExitCode': exit_code,
+        'Duration': int(round(duration, 0))
+    })
+
     actions.execute(
         stage=END,
         dry=args.dry

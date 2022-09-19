@@ -6,7 +6,8 @@ import re
 pattern = re.compile(r'\$\{\{(.*?)\}\}')
 
 PLUGINS = [
-    "secretsmanager"
+    "secretsmanager",
+    "oenv"
 ]
 
 def parse_plugin(
@@ -44,9 +45,15 @@ def parse_plugin(
             return s
         except:
             logging.debug(f"SECRETSMANAGER: failed to get value {value}")
-            return None
+            raise Exception(f"SECRETSMANAGER: failed to get value {value}")
 
-    return None
+    if plugin == "oenv":
+        logging.debug(f"OENV: getting value {value}")
+        if value not in oenv:
+            raise Exception(f"OENV: failed to get value {value}")
+        return oenv[value]
+
+    raise Exception(f"Unknown plugin: {plugin}")
 
 def parse_plugins(
     command: str,
@@ -57,18 +64,20 @@ def parse_plugins(
         s = p.search(command)
         if not s:
             continue
-        o = parse_plugin(plugin, s.group(1), oenv)
-        if not o:
-            continue
-        return o
-    return None
+        try:
+            return parse_plugin(plugin, s.group(1), oenv)
+        except:
+            pass # Ignore if not found.
+    raise Exception("No plugin found")
 
 def parse_command(
     command: str,
     oenv: dict = None
 ):
-    if parse_plugins(command, oenv):
+    try:
         return parse_plugins(command, oenv)
+    except:
+        pass # NOTE: Ignore if not found.
     s = pattern.search(command)
     if not s or not oenv:
         return command

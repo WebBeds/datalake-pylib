@@ -22,7 +22,25 @@ class HTTP(Action):
     retries: int = MAX_RETRIES
     retry_sleep: int = RETRY_SLEEP
 
+    def validate(self, oenv: dict) -> bool:
+        c = self.condition.copy()
+        for idx, v in enumerate(c):
+            c[idx] = parse_command(v, oenv)
+        to_validate = " ".join([str(v) for v in c])
+        try:
+            f = eval(to_validate)
+            if isinstance(f, bool):
+                return f
+            else:
+                raise ValueError("The condition must evaluate to a boolean.")
+        except:
+            return False
+
     def execute(self, oenv: dict, dry: bool = False) -> None:
+
+        if self.condition and not self.validate(oenv):
+            logging.debug("Skipping action due to invalid condition: {0}".format(self.action))
+            return
 
         for param, value in self.params.items():
             self.params[param] = parse_command(value, oenv)
@@ -69,11 +87,12 @@ class HTTP(Action):
         default_max_retries = MAX_RETRIES
         default_retry_sleep = RETRY_SLEEP
 
-        stage, action = Action._parse_default_attr(data)
+        stage, action, condition = Action._parse_default_attr(data)
+
         if "url" not in data:
             raise ValueError("The data must contain the url.")
-
         url = data["url"]
+
         params = default_params
         headers = default_headers
         payload = default_payload
@@ -97,6 +116,7 @@ class HTTP(Action):
         return HTTP(
             stage=stage,
             action=action,
+            condition=condition,
             url=url,
             params=params,
             headers=headers,

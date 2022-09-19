@@ -9,6 +9,7 @@ END = "end"
 class Action:
     stage: str
     action: str
+    condition: list
 
     def _parse_default_attr(data: dict):
         """
@@ -21,7 +22,19 @@ class Action:
             raise ValueError("The data must be a dict.")
         if "stage" not in data and "action" not in data:
             raise ValueError("The data must contain the stage and action.")
-        return data["stage"], data["action"]
+        condition = None
+        if "condition" in data and isinstance(data["condition"], list):
+            condition = data["condition"]
+        return data["stage"], data["action"], condition
+
+    def validate(self, oenv: dict) -> bool:
+        """
+        Validate the action with the given condition if any.
+
+        :param oenv: The oenv.
+        :return: True if the action is valid or not implemented, False otherwise.
+        """
+        return True
 
     @abstractmethod
     def execute(self, oenv: dict, dry: bool = False) -> None:
