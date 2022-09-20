@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import awswrangler as wr
 import logging
 import json
@@ -9,6 +10,31 @@ PLUGINS = [
     "secretsmanager",
     "oenv"
 ]
+
+@dataclass
+class ReplacedCommand:
+    commands: list
+    action: str = "join"
+
+    # NOTE: Valid actions
+    valid_actions = [
+        "join"
+    ]
+
+    def parse(command):
+        if not isinstance(command, dict):
+            raise ValueError("The command must be a dict.")
+        if "commands" not in command:
+            raise ValueError("The command must contain the commands.")
+        if not isinstance(command["commands"], list):
+            raise ValueError("The commands must be a list.")
+        action = "join"
+        if "action" in command and command["action"] in ReplacedCommand.valid_actions:
+            action = command["action"]
+        return ReplacedCommand(
+            commands=command["commands"],
+            action=action
+        )
 
 def parse_plugin(
     plugin: str,
@@ -70,10 +96,29 @@ def parse_plugins(
             pass # Ignore if not found.
     raise Exception("No plugin found")
 
+def parse_replaced_commands(
+    command: str,
+    oenv: dict = None
+) -> str:
+    rc = ReplacedCommand.parse(command)
+    if rc.action == "join":
+        cmd = []
+        for c in rc.commands:
+            try:
+                cmd.append(parse_command(c, oenv))
+            except:
+                cmd.append(c)
+        return " ".join(cmd)
+    raise Exception(f"Unknown action: {rc.action}")
+
 def parse_command(
     command: str,
     oenv: dict = None
 ):
+    try:
+        return parse_replaced_commands(command, oenv)
+    except:
+        pass # Ignore if not found.
     try:
         return parse_plugins(command, oenv)
     except:
