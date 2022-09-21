@@ -79,11 +79,11 @@ class WrapperProcess:
         start = time.time()
 
         # NOTE: Start CloudWatch Metrics Thread
-        self.mt = Thread(
-            target=self.cloudwatch_monitor,
-            args=(start, self.rate, dry)
-        )
-        self.mt.start()
+        # self.mt = Thread(
+        #     target=self.cloudwatch_monitor,
+        #     args=(start, self.rate, dry)
+        # )
+        # self.mt.start()
 
         # NOTE: Start Process
         try:
