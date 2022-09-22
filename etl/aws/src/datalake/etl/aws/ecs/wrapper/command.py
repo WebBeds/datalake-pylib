@@ -3,6 +3,7 @@ import awswrangler as wr
 import logging
 import json
 import re
+import os
 
 pattern = re.compile(r'\$\{\{(.*?)\}\}')
 
@@ -78,6 +79,12 @@ def parse_plugin(
         if value not in oenv:
             raise Exception(f"OENV: failed to get value {value}")
         return oenv[value]
+
+    if plugin == "env":
+        logging.debug(f"ENV: getting value {value}")
+        if value not in os.environ:
+            raise Exception(f"ENV: failed to get value {value}")
+        return os.environ[value]
 
     raise Exception(f"Unknown plugin: {plugin}")
 
