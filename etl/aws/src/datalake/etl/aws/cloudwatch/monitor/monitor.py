@@ -179,6 +179,7 @@ def main() -> None:
         namespace=conf['monitor']['namespace'],
     )
 
+    failed = None
     for _, monitor in enumerate(mnts):
         monitor: Monitor
         logging.info("Running monitor {0}".format(monitor.name))
@@ -189,5 +190,8 @@ def main() -> None:
                 logging.warning("Skipping monitor {0} due to invalid query".format(monitor.name))
                 continue
             logging.error("Error running monitor {0}: {1}".format(monitor.name, e))
-            raise e
+            failed = e
         logging.info("Completed monitor {0}".format(monitor.name))
+
+    if failed:
+        raise failed
