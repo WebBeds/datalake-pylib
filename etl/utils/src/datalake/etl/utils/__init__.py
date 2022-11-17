@@ -1,7 +1,10 @@
 __version__ = "0.1"
 
 # Teams utilities
-import teams
+from .teams import *
 
 # Colors to log
 from .logging import Colors
+
+# Dates utilities
+from .dates import *
