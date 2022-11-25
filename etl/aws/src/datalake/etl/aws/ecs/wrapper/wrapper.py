@@ -136,9 +136,25 @@ def main() -> None:
     # NOTE: Run Process
     exit_code, duration, p = proc.run(dry=args.dry)
 
+    # NOTE: Get StdOut and StdErr
+    stdout: str = None
+    try:
+        stdout = p.stdout.read() if p else None
+    except Exception:
+        pass
+
+    stderr: str = None
+    try:
+        stderr = p.stderr.read() if p else None
+    except Exception:
+        pass
+
     logging.info("EXC: {0}".format(exit_code))
+
     if exit_code != 0 and p:
-        logging.error("ERR: {0}".format(p.stderr.read()))
+        logging.error("ERR: {0}".format(stderr))
+    logging.debug("OUT: {0}".format(stdout))
+
     logging.info("DUR: {0}".format(int(round(duration, 0))))
 
     metrics.add(
@@ -173,7 +189,9 @@ def main() -> None:
     # NOTE: Update oenv with process data.
     actions.oenv.update({
         'ExitCode': exit_code,
-        'Duration': int(round(duration, 0))
+        'Duration': int(round(duration, 0)),
+        'StdOut': stdout,
+        'StdErr': stderr,
     })
 
     actions.execute(
