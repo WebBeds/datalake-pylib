@@ -1,3 +1,4 @@
+from ..command import parse_command
 from dataclasses import dataclass
 from abc import abstractmethod
 import logging
@@ -34,7 +35,18 @@ class Action:
         :param oenv: The oenv.
         :return: True if the action is valid or not implemented, False otherwise.
         """
-        return True
+        c = self.condition.copy()
+        for idx, v in enumerate(c):
+            c[idx] = parse_command(v, oenv)
+        to_validate = " ".join([str(v) for v in c])
+        try:
+            f = eval(to_validate)
+            if isinstance(f, bool):
+                return f
+            else:
+                raise ValueError("The condition must evaluate to a boolean.")
+        except:
+            return False
 
     @abstractmethod
     def execute(self, oenv: dict, dry: bool = False) -> None:

@@ -10,6 +10,7 @@ from .actions import (
 
 # PLUGINS
 from .http import HTTP
+from .s3 import S3
 
 DEFAULT_PLUGIN = "HTTP"
 DEFAULT_PLUGIN_SEARCH_KEY = "plugin"
@@ -26,6 +27,8 @@ def _parse_plugin(plugin_type: str, data: dict) -> Action:
     
     if plugin_type == "HTTP":
         return HTTP.parse(data)
+    elif plugin_type == "S3":
+        return S3.parse(data)
 
     return None
 

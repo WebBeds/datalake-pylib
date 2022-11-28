@@ -22,20 +22,6 @@ class HTTP(Action):
     retries: int = MAX_RETRIES
     retry_sleep: int = RETRY_SLEEP
 
-    def validate(self, oenv: dict) -> bool:
-        c = self.condition.copy()
-        for idx, v in enumerate(c):
-            c[idx] = parse_command(v, oenv)
-        to_validate = " ".join([str(v) for v in c])
-        try:
-            f = eval(to_validate)
-            if isinstance(f, bool):
-                return f
-            else:
-                raise ValueError("The condition must evaluate to a boolean.")
-        except:
-            return False
-
     def execute(self, oenv: dict, dry: bool = False) -> None:
 
         if self.condition and not self.validate(oenv):
