@@ -42,8 +42,16 @@ def get_dimensions(job: str, metrics: WrapperMetrics) -> dict:
 
 def main() -> None:
     
+    # ************************
+    # PARSE ARGV and OS ENV
+    # ************************
+
     args = parse_argv()
     oenv = parse_os_args()
+
+    # ************************
+    # GET UUID
+    # ************************
 
     request_uuid = uuid.uuid4()
     if "ExecutionId" in oenv and oenv["ExecutionId"]:
@@ -61,6 +69,10 @@ def main() -> None:
     logging.info("ARV: {0}".format(sys.argv))
     logging.info("OSV: {0}".format(oenv))
 
+    # ************************
+    # PARSE CONFIG and CLI (cli-json)
+    # ************************
+
     config = parse_config(
         config_path=args.config,
     )
@@ -68,15 +80,58 @@ def main() -> None:
         cli_json=args.cli_json,
         config=config
     )
-    cmd = get_command(
-        entrypoint=cli["entrypoint"],
-        command=cli["command"],
-        oenv=oenv
-    )
 
     logging.info("ARG: {0}".format(args))
     logging.info("CFG: {0}".format(config))
     logging.info("CLI: {0}".format(cli))
+
+    # ************************
+    # METRICS
+    # ************************
+
+    metrics = WrapperMetrics(
+        namespace=config['metrics']['namespace'],
+        team=config['metrics']['team'],
+        group=cli['group'],
+        aws_region=config['metrics']['region']
+    )
+    logging.info("MTS: {0}".format(metrics))
+
+    # ************************
+    # ACTIONS
+    # ************************
+
+    actions = parse_actions(
+        actions=cli['actions'],
+        oenv=oenv
+    )
+    logging.info("ACT: {0}".format(actions))
+
+    metrics.add(SingleMetric(
+        metric_name='Start',
+        dimensions=get_dimensions(cli['job'], metrics),
+        value=1,
+    ))
+    if not args.dry:
+        _ = metrics.send()
+
+    # ************************
+    # PROCESS
+    # ************************
+
+    # NOTE: Execute start actions
+    actions.execute(
+        stage=START,
+        dry=args.dry
+    )
+
+    # NOTE: Use OENV from actions for parsing the command
+    cmd = get_command(
+        entrypoint=cli["entrypoint"],
+        command=cli["command"],
+        oenv=actions.oenv
+    )
+
     logging.info("CMD: {0}".format(cmd))
 
     request = {
@@ -93,27 +148,9 @@ def main() -> None:
     request_b64 = base64.b64encode(json.dumps(request).encode('utf-8'))
     logging.info("REQ: {0}".format(request_b64.decode('utf-8')))
 
-    metrics = WrapperMetrics(
-        namespace=config['metrics']['namespace'],
-        team=config['metrics']['team'],
-        group=cli['group'],
-        aws_region=config['metrics']['region']
-    )
-    logging.info("MTS: {0}".format(metrics))
-
-    actions = parse_actions(
-        actions=cli['actions'],
-        oenv=oenv
-    )
-    logging.info("ACT: {0}".format(actions))
-
-    metrics.add(SingleMetric(
-        metric_name='Start',
-        dimensions=get_dimensions(cli['job'], metrics),
-        value=1,
-    ))
-    if not args.dry:
-        _ = metrics.send()
+    # ************************
+    # Wrapper Process
+    # ************************
 
     proc = WrapperProcess(
         cmd=cmd,
@@ -127,11 +164,6 @@ def main() -> None:
     ]
     for sig in signals_to_handle: 
         signal.signal(sig, proc.signal_handler)
-
-    actions.execute(
-        stage=START,
-        dry=args.dry
-    )
 
     # NOTE: Run Process
     exit_code, duration, p = proc.run(dry=args.dry)
@@ -153,10 +185,11 @@ def main() -> None:
 
     if exit_code != 0 and p:
         logging.error("ERR: {0}".format(stderr))
+    
     logging.debug("OUT: {0}".format(stdout))
-
     logging.info("DUR: {0}".format(int(round(duration, 0))))
 
+    # NOTE: Send metrics about the process
     metrics.add(
         SingleMetric(
             metric_name='Duration',
