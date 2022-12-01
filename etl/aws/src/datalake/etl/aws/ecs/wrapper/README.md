@@ -127,6 +127,8 @@ The oenv data are variables to be used on commands, headers, params, etc. These 
     "CreationTimestampMilliseconds": "<creation_timestamp_milliseconds>", # Parsed Variable (Comes from parsed AWS_EXECUTION_START)
     "ExecutionId": "<execution_id>", # Parsed Variable (Comes from parsed AWS_EXECUTION_ARN)
     "ExitCode": "<exit_code>", # Process Variable (Comes from the process exit code) (Only available on end stage)
+    "StdErr": "<stderr>", # Process Variable (Comes from the process stderr) (Only available on end stage)
+    "StdOut": "<stdout>", # Process Variable (Comes from the process stdout) (Only available on end stage)
     "Duration": "<duration>", # Process Variable (Comes from the process duration) (Only available on end stage)
 }
 ```

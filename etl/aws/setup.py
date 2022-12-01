@@ -52,6 +52,7 @@ setup(
 	scripts=[
 		"bin/twrap",
 		"bin/twatch",
+		"bin/troler",
 	],
 	python_requires=">=3.6",
     install_requires=[

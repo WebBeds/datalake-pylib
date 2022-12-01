@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+from datalake.etl.aws.iam.roler import main
+
+if __name__ == "__main__":
+    main()
