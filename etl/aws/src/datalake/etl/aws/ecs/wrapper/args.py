@@ -34,6 +34,7 @@ def parse_argv() -> argparse.Namespace:
         required=True,
     )
     parser.add_argument("--dry", help="Dry mode", action="store_true")
+    parser.add_argument("--verbose", help="Verbose mode", action="store_true")
     parser.add_argument("--debug", help="Debug mode", action="store_true")
 
     return parser.parse_args()

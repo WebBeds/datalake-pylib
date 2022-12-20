@@ -185,8 +185,13 @@ def main() -> None:
 
     if exit_code != 0 and p:
         logging.error("ERR: {0}".format(stderr))
-    
-    logging.debug("OUT: {0}".format(stdout))
+
+    if args.verbose:
+        logging.info("OUT: {0}".format(stdout))
+        logging.info("ERR: {0}".format(stderr))
+    else:
+        logging.debug("OUT: {0}".format(stdout))
+
     logging.info("DUR: {0}".format(int(round(duration, 0))))
 
     # NOTE: Send metrics about the process
