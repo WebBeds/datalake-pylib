@@ -1,6 +1,7 @@
 
 from .pandas import PandasEngine
 from .messages import MessageEngine
+from .index import IndexEngine
 
 class Engines(dict):
     def __init__(self, *args, **kwargs):
@@ -11,4 +12,5 @@ class Engines(dict):
 ENGINES = Engines(
     message=MessageEngine,
     pandas=PandasEngine,
+    index=IndexEngine,
 )
