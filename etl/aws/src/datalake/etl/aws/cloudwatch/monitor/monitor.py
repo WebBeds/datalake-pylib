@@ -1,7 +1,5 @@
-from ...ecs.wrapper.metrics import SingleMetric
-from .metrics import MonitorMetrics
-from dataclasses import dataclass
-import awswrangler as wr
+from .watcher import Watcher
+
 import configparser
 import argparse
 import logging
@@ -11,87 +9,24 @@ import os
 
 DEFAULT_CONFIG = "monitor.conf"
 DEFAULT_VALUE = 7 * 24 * 60 * 60
-DEFAULT_ATHENA_KWARGS = {
-    "database": "default",
-    "ctas_approach": False
-}
-
-@dataclass
-class Monitor:
-    name: str
-    dimensions: dict
-    unit: str
-    sql: str
-    athena_kwargs: dict = None
-    default_value: float = DEFAULT_VALUE
-
-    def _process_dimensions(
-        self,
-        dimension,
-        default,
-        input
-    ):
-        if str(dimension).lower() in input:
-            return str(input[str(dimension).lower()])
-        else:
-            return default
-
-    def run(self, metrics: MonitorMetrics, dry: bool = False) -> None:
-
-        if not self.athena_kwargs:
-            self.athena_kwargs = DEFAULT_ATHENA_KWARGS
-        else:
-            self.athena_kwargs.update(DEFAULT_ATHENA_KWARGS)
-
-        df = wr.athena.read_sql_query(
-            sql=self.sql,
-            **self.athena_kwargs
-        )
-        df.columns = df.columns.str.lower()
-
-        if df.empty:
-            logging.warning("No data returned from query")
-            return
-
-        df[self.name.lower()] = df[self.name.lower()].fillna(self.default_value)
-
-        for _, row in df.iterrows():
-            m = SingleMetric(
-                metric_name=self.name,
-                dimensions={
-                    k: self._process_dimensions(
-                        k,
-                        v,
-                        row
-                    ) for k, v in self.dimensions.items()
-                },
-                value=row[self.name.lower()],
-                unit=self.unit
-            )
-            logging.info(m.to_cloudwatch_metric())
-            metrics.add(m)
- 
-        if not dry:
-            metrics.send()
-
-        return
 
 def parse_args() -> argparse.Namespace:
 
-    parser = argparse.ArgumentParser(description='CloudWatch Metrics Monitor')
+    parser = argparse.ArgumentParser(description='SQLMonitor, monitor your SQL query, send messages to CloudWatch metrics or any other metrics system')
 
     parser.add_argument(
-        '-c', '--config',
-        help='config file',
+        "-c", "--config",
+        help="config file",
         default=DEFAULT_CONFIG,
-        type=str
     )
+
     parser.add_argument(
         '-m', '--monitors',
         help='monitors to run',
         default=None,
         type=str
     )
+
     parser.add_argument('--dry', help='dry run', action='store_true')
 
     return parser.parse_args()
@@ -124,7 +59,7 @@ def parse_config(config_file: str) -> configparser.ConfigParser:
         } for key in keys
     }
 
-def parse_monitor(monitor_file: str) -> list:
+def parse_monitor(monitor_file: str, conf: argparse.Namespace) -> list:
 
     if not os.access(monitor_file, os.R_OK):
         raise Exception("Monitor file \"{0}\" does not have read permissions".format(monitor_file))
@@ -138,10 +73,18 @@ def parse_monitor(monitor_file: str) -> list:
         raise Exception("Monitor file \"{0}\" is not a valid list or dict data structure".format(monitor_file))
 
     if isinstance(spec, dict):
-        return [Monitor(**spec)]
-    return [Monitor(**m) for m in spec]
+        if conf['monitor']['namespace']:
+            spec['namespace'] = conf['monitor']['namespace']
+        return [Watcher.parse(spec)]
+    
+    for idx in range(len(spec)):
+        if 'namespace' in spec[idx]:
+            continue
+        spec[idx]['namespace'] = conf['monitor']['namespace']
 
-def parse_monitors(monitors_path: str) -> list:
+    return [Watcher.parse(m) for m in spec]
+
+def parse_monitors(monitors_path: str, conf: argparse.Namespace) -> list:
 
     monitors = []
 
@@ -149,10 +92,10 @@ def parse_monitors(monitors_path: str) -> list:
         raise Exception("Monitors file \"{0}\" does not exist".format(monitors_path))
 
     if not os.path.isdir(os.path.abspath(monitors_path)):
-        return parse_monitor(os.path.abspath(monitors_path))
+        return parse_monitor(os.path.abspath(monitors_path), conf)
 
     for f in os.listdir(os.path.abspath(monitors_path)):
-        monitors.extend(parse_monitor(os.path.abspath(os.path.join(monitors_path, f))))
+        monitors.extend(parse_monitor(os.path.abspath(os.path.join(monitors_path, f)), conf))
 
     return monitors
 
@@ -174,17 +117,14 @@ def main() -> None:
         logging.warning("No monitors specified, exiting...")
         return
 
-    mnts = parse_monitors(args.monitors)
-    metrics = MonitorMetrics(
-        namespace=conf['monitor']['namespace'],
-    )
+    mnts = parse_monitors(args.monitors, conf)
 
     failed = None
     for _, monitor in enumerate(mnts):
-        monitor: Monitor
+        monitor: Watcher
         logging.info("Running monitor {0}".format(monitor.name))
         try:
-            monitor.run(metrics,args.dry)
+            monitor.run(args.dry)
         except Exception as e:
             if str(type(e)) == "<class 'botocore.errorfactory.InvalidRequestException'>":
                 logging.warning("Skipping monitor {0} due to invalid query".format(monitor.name))

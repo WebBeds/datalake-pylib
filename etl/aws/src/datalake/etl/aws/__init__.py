@@ -2,7 +2,7 @@
 # AWS MODULE OF ETL         #
 # ========================= #
 
-__version__ = "0.1"
+__version__ = "0.5"
 
 from . import (
     awslambda,
