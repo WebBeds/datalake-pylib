@@ -9,7 +9,8 @@ pattern = re.compile(r'\$\{\{(.*?)\}\}')
 
 PLUGINS = [
     "secretsmanager",
-    "oenv"
+    "oenv",
+    "env",
 ]
 
 @dataclass
