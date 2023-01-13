@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from ..outputs import (
     Output,
-    CloudWatch
+    CloudWatch,
+    Teams,
 )
 from ..sources import (
     Source,
@@ -104,6 +105,8 @@ class Watcher:
 
         if str(output["type"]).lower() == "cloudwatch":
             output = CloudWatch.parse(output)
+        elif str(output["type"]).lower() == "teams":
+            output = Teams.parse(output)
 
         return Watcher(
             name=name,
