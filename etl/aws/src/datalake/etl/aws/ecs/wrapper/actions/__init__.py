@@ -11,6 +11,7 @@ from .actions import (
 # PLUGINS
 from .http import HTTP
 from .s3 import S3
+from .sns import SNSECSErrorTrace
 
 DEFAULT_PLUGIN = "HTTP"
 DEFAULT_PLUGIN_SEARCH_KEY = "plugin"
@@ -29,6 +30,8 @@ def _parse_plugin(plugin_type: str, data: dict) -> Action:
         return HTTP.parse(data)
     elif plugin_type == "S3":
         return S3.parse(data)
+    elif plugin_type == "ECS_SNSTRACE":
+        return SNSECSErrorTrace.parse(data)
 
     return None
 

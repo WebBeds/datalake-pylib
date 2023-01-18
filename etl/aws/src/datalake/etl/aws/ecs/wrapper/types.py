@@ -13,10 +13,13 @@ class Argument:
     default: Any = None
 
     def parse(self, input) -> Any:
-        if not input: 
+        try:
+            if not input: 
+                return self.schema.parse(self.default)
+            if self.key in input:
+                return self.schema.parse(input[self.key])
+            if self.search_key and self.search_key in input:
+                return self.schema.parse(input[self.search_key])
             return self.schema.parse(self.default)
-        if self.key in input:
-            return self.schema.parse(input[self.key])
-        if self.search_key and self.search_key in input:
-            return self.schema.parse(input[self.search_key])
-        return self.schema.parse(self.default)
+        except Exception:
+            return self.default

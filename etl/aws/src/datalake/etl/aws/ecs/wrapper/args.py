@@ -84,12 +84,12 @@ def parse_config(
             Argument('group'),
             Argument('region', default=DEFAULT_AWS_REGION),
             Argument('rate', default=DEFAULT_RATE),
-        ]
+        ],
     }
 
     return {
         key: {
-            arg.key: arg.parse(config[key] if config else None) for arg in keys[key]
+            arg.key: arg.parse(config[key] if config and key in config else None) for arg in keys[key]
         } for key in keys
     }
 
@@ -125,6 +125,10 @@ def parse_cli(
         Argument('actions',
             schema=ParsedCLIArgument(arg_type=list),
             default=[],
+        ),
+        Argument('retries',
+            schema=ParsedCLIArgument(arg_type=int),
+            default=None,
         )
     ]
 

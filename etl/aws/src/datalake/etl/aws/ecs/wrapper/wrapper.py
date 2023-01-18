@@ -85,6 +85,13 @@ def main() -> None:
     logging.info("CFG: {0}".format(config))
     logging.info("CLI: {0}".format(cli))
 
+    oenv.update({
+        "_execution": {
+            "config": config,
+            "cli": cli,
+        }
+    })
+
     # ************************
     # METRICS
     # ************************
@@ -165,8 +172,7 @@ def main() -> None:
     for sig in signals_to_handle: 
         signal.signal(sig, proc.signal_handler)
 
-    # NOTE: Run Process
-    exit_code, duration, p = proc.run(dry=args.dry)
+    exit_code, duration, p = proc.run(dry=args.dry, retries=cli['retries'])
 
     # NOTE: Get StdOut and StdErr
     stdout: str = None

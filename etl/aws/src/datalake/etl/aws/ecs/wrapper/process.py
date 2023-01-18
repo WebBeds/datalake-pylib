@@ -74,18 +74,10 @@ class WrapperProcess:
         # NOTE: Send signal to process
         return self.p.send_signal(signal) if self.p else None
 
-    def run(self, dry: bool = False) -> int:
-        
+    def _run_process(self):
+
         start = time.time()
 
-        # NOTE: Start CloudWatch Metrics Thread
-        # self.mt = Thread(
-        #     target=self.cloudwatch_monitor,
-        #     args=(start, self.rate, dry)
-        # )
-        # self.mt.start()
-
-        # NOTE: Start Process
         try:
             self.p = Popen(
                 args=self.cmd,
@@ -103,3 +95,47 @@ class WrapperProcess:
         end = time.time()
 
         return exit_code, (end - start), self.p
+
+    def run(self, dry: bool = False, retries: int = None):
+        
+        if not retries or (retries and retries < 1):
+            return self._run_process()
+
+        exit_code, duration, p = self._run_process()
+        if exit_code == 0:
+            return exit_code, duration, p
+
+        for retry in range(retries):
+            
+            exit_code, duration, p = self._run_process()
+            if exit_code == 0:
+                return exit_code, duration, p
+
+            stderr = None
+            stdout = None
+
+            try:
+                stderr = p.stderr.read() if p else None
+            except:
+                pass
+        
+            try:
+                stdout = p.stdout.read() if p else None
+            except:
+                pass
+
+            logging.error("{}{}ERR: ".format(
+                f"RETRY {retry + 1}",
+                "\t" * 2,
+                stderr
+            )) if stderr else None
+
+            logging.error("{}{}OUT: ".format(
+                f"RETRY {retry + 1}",
+                "\t" * 2,
+                stdout
+            )) if stdout else None
+
+            retries -= 1
+        
+        return exit_code, duration, p
