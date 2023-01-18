@@ -70,8 +70,8 @@ class SNSECSErrorTrace(Action):
         # Obtain the last 10 lines of the StdErr
         stderr = stderr.splitlines()[-10:]
 
-        message = """\rError summary:\r{}""".format(
-            "\r".join(stderr)
+        message = """\n**Error summary:**\n\n\n```{}""".format(
+            "\n".join(stderr)
         )
 
         return base64.b64encode(message.encode("utf-8")).decode("utf-8")
