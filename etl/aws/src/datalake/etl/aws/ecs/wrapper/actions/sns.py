@@ -74,7 +74,7 @@ class SNSECSErrorTrace(Action):
             "\r".join(stderr)
         )
 
-        return message
+        return base64.encodestring(message.encode("utf-8")).decode("utf-8")
 
     def execute(self, oenv: dict, dry: bool = False) -> None:
         if self.condition and not self.validate(oenv):
