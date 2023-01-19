@@ -10,6 +10,8 @@ from ..sources import (
     Postgres,
 )
 
+import logging
+
 DEFAULT_VALUE = 7 * 24 * 60 * 60 # 7 days
 DEFAULT_SOURCE = "athena"
 DEFAULT_OUTPUT = "cloudwatch"
@@ -33,7 +35,8 @@ class Watcher:
         df.columns = df.columns.str.lower()
 
         if df.empty:
-            raise ValueError("Watcher returned empty dataframe")
+            logging.warning(f"Watcher `{self.name}` returned empty dataframe")
+            return
         if not self.name.lower() in df.columns:
             raise ValueError(f"Watcher returned no column named {self.name.lower()}")
 
