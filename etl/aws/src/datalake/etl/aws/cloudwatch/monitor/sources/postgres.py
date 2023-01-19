@@ -4,6 +4,7 @@ from .source import Source, pd
 import awswrangler as wr
 import pg8000
 
+@dataclass
 class Postgres(Source):
 
     connection: str
