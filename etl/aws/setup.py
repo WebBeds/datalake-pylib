@@ -58,7 +58,7 @@ setup(
     install_requires=[
 		"boto3>=1.16.45",
 		"s3fs>=0.4.2",
-		"awswrangler>=2.16.1",
-		"requests>=2.28.0"
+		"requests>=2.28.0",
+		"datalake-etl-wrangler @ git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-wrangler&subdirectory=etl/wrangler",
 	]
 )

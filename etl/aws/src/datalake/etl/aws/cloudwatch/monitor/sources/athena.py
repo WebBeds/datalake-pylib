@@ -1,6 +1,6 @@
 from .source import Source, pd
 
-import awswrangler as wr
+import datalake.etl.wrangler as wr
 
 class Athena(Source):
 
@@ -15,7 +15,7 @@ class Athena(Source):
         self.athena_kwargs = athena_kwargs
 
     def retrieve(self, query: str) -> pd.DataFrame:
-        return wr.athena.read_sql_query(
+        return wr.athena.read_sql_query_with_retry(
             sql=query,
             **self.DEFAULT_ATHENA_KWARGS
         )
