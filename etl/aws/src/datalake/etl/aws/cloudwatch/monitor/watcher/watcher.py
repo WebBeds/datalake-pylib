@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from datetime import datetime
+from croniter import croniter
+
 from ..outputs import (
     Output,
     CloudWatch,
@@ -26,8 +29,21 @@ class Watcher:
     output: Output
 
     default_value: float = DEFAULT_VALUE
+    cron_expression: str = None
 
-    def run(self, dry: bool = False) -> None:
+    def validate_cron(self, now: datetime) -> bool:
+        if not self.cron_expression or not now:
+            return True        
+        return croniter.match(
+            self.cron_expression,
+            now,
+        )
+
+    def run(self, dry: bool = False, now: datetime = None) -> None:
+
+        if not self.validate_cron(now):
+            logging.info(f"Watcher `{self.name}` skipped due to cron expression")
+            return
 
         df = self.source.retrieve(
             query=self.sql
@@ -62,6 +78,7 @@ class Watcher:
         name: str = data.get("name")
         sql: str = data.get("sql")
         default_value: float = data.get("default_value", DEFAULT_VALUE)
+        cron_expression: str = data.get("cron", None)
 
         source: dict or str = data.get("source", DEFAULT_SOURCE)
         source_opts: dict = data.get("source_opts", {})
@@ -116,5 +133,6 @@ class Watcher:
             sql=sql,
             source=source,
             output=output,
-            default_value=default_value
+            default_value=default_value,
+            cron_expression=cron_expression,
         )

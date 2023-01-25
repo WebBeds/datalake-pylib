@@ -1,3 +1,4 @@
+from datetime import datetime
 from .watcher import Watcher
 
 import configparser
@@ -108,6 +109,7 @@ def main() -> None:
 
     args = parse_args()
     conf = parse_config(args.config)
+    now = datetime.utcnow()
 
     logging.info("ARGV: {0}".format(sys.argv))
     logging.info("ARGS: {0}".format(args))
@@ -124,7 +126,7 @@ def main() -> None:
         monitor: Watcher
         logging.info("Running monitor {0}".format(monitor.name))
         try:
-            monitor.run(args.dry)
+            monitor.run(args.dry, now)
         except Exception as e:
             if str(type(e)) == "<class 'botocore.errorfactory.InvalidRequestException'>":
                 logging.warning("Skipping monitor {0} due to invalid query".format(monitor.name))

@@ -60,5 +60,6 @@ setup(
 		"s3fs>=0.4.2",
 		"requests>=2.28.0",
 		"datalake-etl-wrangler @ git+https://www.github.com/Webjet/datalake-pylib#egg=datalake-etl-wrangler&subdirectory=etl/wrangler",
+		"croniter>=1.3.8",
 	]
 )
