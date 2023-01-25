@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from .watcher import Watcher
 
 import configparser
@@ -100,6 +100,9 @@ def parse_monitors(monitors_path: str, conf: argparse.Namespace) -> list:
 
     return monitors
 
+def round_dt(dt, delta) -> datetime:
+    return datetime.min + round((dt - datetime.min) / delta) * delta
+
 def main() -> None:
 
     logging.basicConfig(
@@ -109,7 +112,9 @@ def main() -> None:
 
     args = parse_args()
     conf = parse_config(args.config)
-    now = datetime.utcnow()
+    
+    delta = timedelta(minutes=30)
+    now = round_dt(datetime.utcnow(), delta)
 
     logging.info("ARGV: {0}".format(sys.argv))
     logging.info("ARGS: {0}".format(args))
