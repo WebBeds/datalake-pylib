@@ -50,8 +50,8 @@ class CloudWatch(Output):
                 unit=self.unit
             )
             logging.info(m.to_cloudwatch_metric())
+            metrics.add(m)
 
-        metrics.add(m)
         metrics.send()
 
     @staticmethod
@@ -69,18 +69,20 @@ class CloudWatch(Output):
         name = original_src.get("name", None)
         dimensions = original_src.get("dimensions", None)
         unit: str = original_src.get("unit", None)
+        namespace: str = original_src.get("namespace", None)
 
         if not dimensions and data.get("options", {}).get("dimensions", None):
             dimensions = data.get("options", {}).get("dimensions", None)
         if not unit and data.get("options", {}).get("unit", None):
             unit = data.get("options", {}).get("unit", None)
+        if not namespace and data.get("options", {}).get("namespace", None):
+            namespace: str = data.get("options", {}).get("namespace", None)
 
         if not dimensions:
             raise ValueError("CloudWatch output must have dimensions and unit")
         if not unit:
             unit = DEFAULT_UNITS
 
-        namespace: str = data.get("options", {}).get("namespace", None)
         region: str = data.get("options", {}).get("region", "eu-west-1")
         
         return CloudWatch(
