@@ -9,6 +9,13 @@ def valid_aws_datetime(s):
         msg = "Not a valid date: '{}'.".format(s)
         raise argparse.ArgumentTypeError(msg)
 
+def valid_date(s):
+    try:
+        return datetime.strptime(s, "%Y-%m-%d")
+    except ValueError:
+        msg = "Not a valid date: '{}'.".format(s)
+        raise argparse.ArgumentTypeError(msg)
+
 def valid_epoch(s):
     try:
         return datetime.utcfromtimestamp(int(s))
@@ -18,6 +25,12 @@ def valid_epoch(s):
 
 def trunc_datetime_to_seconds(dt: datetime):
     return datetime.fromisoformat(dt.strftime("%Y-%m-%dT%H:%M:00"))
+
+def trunc_datetime_to_minutes(dt: datetime):
+    return datetime.fromisoformat(dt.strftime("%Y-%m-%dT%H:00:00"))
+
+def trunc_datetime_to_days(dt: datetime):
+    return datetime.fromisoformat(dt.strftime("%Y-%m-%dT00:00:00"))
 
 def get_now(timestamp):
     if timestamp == 0:
