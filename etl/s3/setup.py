@@ -55,7 +55,7 @@ setup(
     install_requires=[
 		"pandas>=1.2.4",
 		"numpy>=1.21.0",
-		"requests>=2.28.0"
+		"requests>=2.28.0",
         "boto3>=1.16.45",
         "pyarrow>=7.0.0",
 		"s3fs>=0.4.2",
