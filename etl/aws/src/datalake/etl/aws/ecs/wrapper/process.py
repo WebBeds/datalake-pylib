@@ -44,6 +44,20 @@ class WrapperProcess:
                 _ = self.metrics.send()
             c = 0
 
+    def stdout_consumer(self) -> None:
+        # Consume stdout
+        while not self.e.is_set():
+            try:
+                if not self.p or not self.p.stdout or self.p.stdout.closed:
+                    break
+                line = self.p.stdout.readline()
+                if line:
+                    logging.debug(f"LOG: {line.strip()}")
+            except:
+                pass
+            finally:
+                time.sleep(0.5)
+
     def signal_handler(self, signal, frame) -> None:
         logging.debug('Received signal: {}'.format(signal))
 
@@ -89,6 +103,11 @@ class WrapperProcess:
             end = time.time()
             self.e.set()
             return 1, (end - start), None
+
+        # NOTE: Start STDOUT consumer.
+        Thread(
+            target=self.stdout_consumer,
+        ).start()
 
         exit_code = self.p.wait(timeout=self.timeout)
         self.e.set()
