@@ -4,11 +4,11 @@
 # SCHEMA TYPES              #
 # ========================= #
 
-import pandas as pd
-import numpy as np
 import re
-
 from datetime import date, datetime
+
+import numpy as np
+import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype
 
 
@@ -30,7 +30,7 @@ class Str:
         self.trim = trim
 
     def format(self, s: pd.Series) -> pd.Series:
-        s = s.astype(str).fillna('')
+        s = s.astype(str).fillna("")
         if self.clean:
             s = s.str.replace(re.compile(r"^(None|nan|0| +)$"), "", regex=True)
             # s = s.map(lambda x: None if x in ('None', 'nan', '0') else x)
@@ -69,7 +69,7 @@ class Bool:
 
     def format(self, s: pd.Series) -> pd.Series:
         if self.text:
-            s = s.fillna(0).apply(lambda x: True if x == 'true' else False)
+            s = s.fillna(0).apply(lambda x: True if x == "true" else False)
         else:
             s = s.fillna(0).apply(lambda x: bool(int(x)))
 
@@ -93,7 +93,7 @@ class ArrayInt:
 
 
 class Time:
-    def __init__(self, infer=True, utc=False, unit: str = 'ns') -> None:
+    def __init__(self, infer=True, utc=False, unit: str = "ns") -> None:
         super().__init__()
         self.utc = utc
         self.infer = infer
@@ -104,13 +104,19 @@ class Time:
             if self.infer:
                 s = pd.to_datetime(s, infer_datetime_format=True, utc=self.utc, unit=self.unit)
             else:
-                s = pd.to_datetime(s, format='%Y-%m-%dT%H:%M:%SZ', utc=self.utc, errors='coerce', unit=self.unit)
+                s = pd.to_datetime(
+                    s, format="%Y-%m-%dT%H:%M:%SZ", utc=self.utc, errors="coerce", unit=self.unit
+                )
         elif self.utc:
             s = pd.to_datetime(s, infer_datetime_format=True, utc=True, unit=self.unit)
 
-        if self.utc and str(s.dtypes) != str(pd.DatetimeTZDtype(tz='UTC')):
+        if self.utc and str(s.dtypes) != str(pd.DatetimeTZDtype(tz="UTC")):
             print(f"WARNING: time was not in UTC {s.dtypes}")
-            s = s.map(lambda x: x if x.tzinfo is not None else pd.to_datetime(x, unit=self.unit).tz_localize('UTC'))
+            s = s.map(
+                lambda x: x
+                if x.tzinfo is not None
+                else pd.to_datetime(x, unit=self.unit).tz_localize("UTC")
+            )
         return s
 
 
@@ -127,17 +133,28 @@ class Date:
                 s = pd.to_datetime(s, infer_datetime_format=True, utc=self.utc)
             else:
                 if self.dformat is None:
-                    f = '%Y-%m-%d'
+                    f = "%Y-%m-%d"
                 else:
                     f = self.dformat
-                s = pd.to_datetime(s, format=f, utc=self.utc, errors='coerce')
+                s = pd.to_datetime(s, format=f, utc=self.utc, errors="coerce")
         elif self.utc:
             s = pd.to_datetime(s, infer_datetime_format=True, utc=True)
 
-        if self.utc and str(s.dtypes) != str(pd.DatetimeTZDtype(tz='UTC')):
+        if self.utc and str(s.dtypes) != str(pd.DatetimeTZDtype(tz="UTC")):
             print(f"WARNING: time was not in UTC {s.dtypes}")
-            s = s.map(lambda x: x if x.tzinfo is not None else pd.to_datetime(x).tz_localize('UTC'))
+            s = s.map(
+                lambda x: x if x.tzinfo is not None else pd.to_datetime(x).tz_localize("UTC")
+            )
 
         s = s.dt.date
 
+        return s
+
+
+class Category:
+    def __init__(self) -> None:
+        super().__init__()
+
+    def format(self, s: pd.Series) -> pd.Series:
+        s = s.fillna("").astype("category")
         return s

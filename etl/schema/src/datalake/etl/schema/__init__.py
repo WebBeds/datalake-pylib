@@ -3,19 +3,20 @@
 # ========================= #
 
 # Release 0.1
-__version__ = "0.1"
+__version__ = "0.2"
 
 # Data Types
 from .types import (
+    ArrayInt,
+    ArrayString,
+    Bool,
+    Category,
+    Date,
     Dummy,
-    Str,
     Float,
     Int,
-    Bool,
-    ArrayString,
-    ArrayInt,
+    Str,
     Time,
-    Date
 )
 
 # Data Methods
