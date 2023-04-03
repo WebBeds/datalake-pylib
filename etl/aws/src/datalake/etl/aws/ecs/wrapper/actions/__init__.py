@@ -1,12 +1,7 @@
 import json
 import logging
 
-from .actions import (
-    WrapperActions,
-    Action,
-    START,
-    END
-)
+from .actions import END, START, Action, WrapperActions
 
 # PLUGINS
 from .http import HTTP
@@ -15,6 +10,7 @@ from .sns import SNSECSErrorTrace
 
 DEFAULT_PLUGIN = "HTTP"
 DEFAULT_PLUGIN_SEARCH_KEY = "plugin"
+
 
 def _parse_plugin(plugin_type: str, data: dict) -> Action:
     """
@@ -25,7 +21,7 @@ def _parse_plugin(plugin_type: str, data: dict) -> Action:
 
     :return: The action instance.
     """
-    
+
     if plugin_type == "HTTP":
         return HTTP.parse(data)
     elif plugin_type == "S3":
@@ -34,6 +30,7 @@ def _parse_plugin(plugin_type: str, data: dict) -> Action:
         return SNSECSErrorTrace.parse(data)
 
     return None
+
 
 def _parse_action(data: dict) -> Action:
     if isinstance(data, str):
@@ -49,6 +46,7 @@ def _parse_action(data: dict) -> Action:
 
     return _parse_plugin(plugin_type.upper(), data)
 
+
 def parse_actions(actions: list, oenv: dict) -> WrapperActions:
 
     parsed_actions = []
@@ -62,7 +60,4 @@ def parse_actions(actions: list, oenv: dict) -> WrapperActions:
             continue
         parsed_actions.append(parsed_action)
 
-    return WrapperActions(
-        actions=parsed_actions,
-        oenv=oenv
-    )
+    return WrapperActions(actions=parsed_actions, oenv=oenv)

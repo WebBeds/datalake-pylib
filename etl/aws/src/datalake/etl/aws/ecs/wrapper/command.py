@@ -1,11 +1,12 @@
-from dataclasses import dataclass
-import awswrangler as wr
-import logging
 import json
-import re
+import logging
 import os
+import re
+from dataclasses import dataclass
 
-pattern = re.compile(r'\$\{\{(.*?)\}\}')
+import awswrangler as wr
+
+pattern = re.compile(r"\$\{\{(.*?)\}\}")
 
 PLUGINS = [
     "secretsmanager",
@@ -13,15 +14,14 @@ PLUGINS = [
     "env",
 ]
 
+
 @dataclass
 class ReplacedCommand:
     commands: list
     action: str = "join"
 
     # NOTE: Valid actions
-    valid_actions = [
-        "join"
-    ]
+    valid_actions = ["join"]
 
     def parse(command):
         if not isinstance(command, dict):
@@ -33,16 +33,10 @@ class ReplacedCommand:
         action = "join"
         if "action" in command and command["action"] in ReplacedCommand.valid_actions:
             action = command["action"]
-        return ReplacedCommand(
-            commands=command["commands"],
-            action=action
-        )
+        return ReplacedCommand(commands=command["commands"], action=action)
 
-def parse_plugin(
-    plugin: str,
-    value: str,
-    oenv: dict = None
-) -> str:
+
+def parse_plugin(plugin: str, value: str, oenv: dict = None) -> str:
 
     # ==========================
     # secretsmanager
@@ -61,12 +55,10 @@ def parse_plugin(
 
         logging.debug(f"SECRETSMANAGER: getting value {value}")
         try:
-            s = wr.secretsmanager.get_secret(
-                value
-            )
+            s = wr.secretsmanager.get_secret(value)
             # Parse format
             if secret_format == "json":
-                s = json.loads(s)                
+                s = json.loads(s)
             # Parse search key
             if secret_format == "json" and secret_search_key in s:
                 return s[secret_search_key]
@@ -89,25 +81,21 @@ def parse_plugin(
 
     raise Exception(f"Unknown plugin: {plugin}")
 
-def parse_plugins(
-    command: str,
-    oenv: dict = None
-) -> str:
+
+def parse_plugins(command: str, oenv: dict = None) -> str:
     for plugin in PLUGINS:
-        p = re.compile(r'\$\{\{' + plugin + r'.(.*?)\}\}')
+        p = re.compile(r"\$\{\{" + plugin + r".(.*?)\}\}")
         s = p.search(command)
         if not s:
             continue
         try:
             return parse_plugin(plugin, s.group(1), oenv)
         except:
-            pass # Ignore if not found.
+            pass  # Ignore if not found.
     raise Exception("No plugin found")
 
-def parse_replaced_commands(
-    command: str,
-    oenv: dict = None
-) -> str:
+
+def parse_replaced_commands(command: str, oenv: dict = None) -> str:
     rc = ReplacedCommand.parse(command)
     if rc.action == "join":
         cmd = []
@@ -119,18 +107,16 @@ def parse_replaced_commands(
         return " ".join(cmd)
     raise Exception(f"Unknown action: {rc.action}")
 
-def parse_command(
-    command: str,
-    oenv: dict = None
-):
+
+def parse_command(command: str, oenv: dict = None):
     try:
         return parse_replaced_commands(command, oenv)
     except:
-        pass # Ignore if not found.
+        pass  # Ignore if not found.
     try:
         return parse_plugins(command, oenv)
     except:
-        pass # NOTE: Ignore if not found.
+        pass  # NOTE: Ignore if not found.
     s = pattern.search(command)
     if not s or not oenv:
         return command
@@ -138,21 +124,16 @@ def parse_command(
         return command
     return pattern.sub(lambda x: oenv[x.group(1)], command)
 
-def parse_commands(
-    commands: list,
-    oenv: dict
-) -> list:
+
+def parse_commands(commands: list, oenv: dict) -> list:
     if not oenv:
         return commands
     for idx, command in enumerate(commands):
         commands[idx] = parse_command(command, oenv)
     return commands
 
-def get_command(
-    entrypoint: list,
-    command: list,
-    oenv: dict = None
-) -> list:
+
+def get_command(entrypoint: list, command: list, oenv: dict = None) -> list:
     cmd = []
     if entrypoint and len(entrypoint) > 0:
         cmd.extend(entrypoint)

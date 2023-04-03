@@ -1,16 +1,16 @@
-from ..command import parse_command
-from dataclasses import dataclass
-from .actions import (
-    Action
-)
-
-import requests
 import logging
 import time
+from dataclasses import dataclass
+
+import requests
+
+from ..command import parse_command
+from .actions import Action
 
 DEFAULT_METHOD = "POST"
 MAX_RETRIES = 3
 RETRY_SLEEP = 5
+
 
 @dataclass
 class HTTP(Action):
@@ -47,7 +47,7 @@ class HTTP(Action):
             url=self.url,
             headers=self.headers,
             params=self.params,
-            json=self.payload
+            json=self.payload,
         )
         r = r.prepare()
 
@@ -109,5 +109,5 @@ class HTTP(Action):
             payload=payload,
             method=method,
             retries=max_retries,
-            retry_sleep=retry_sleep
+            retry_sleep=retry_sleep,
         )

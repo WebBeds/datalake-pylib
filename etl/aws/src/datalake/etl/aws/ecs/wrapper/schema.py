@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
+
 from .types import Schema
+
 
 @dataclass
 class ParsedTimeSeconds(Schema):
@@ -11,11 +13,10 @@ class ParsedTimeSeconds(Schema):
         try:
             if not isinstance(input, str):
                 return input
-            return str(int(datetime.strptime(
-                input, self.format
-            ).timestamp()))
+            return str(int(datetime.strptime(input, self.format).timestamp()))
         except Exception:
             return input
+
 
 @dataclass
 class ParsedTimeMilliseconds(Schema):
@@ -25,20 +26,20 @@ class ParsedTimeMilliseconds(Schema):
         try:
             if not isinstance(input, str):
                 return input
-            return str(datetime.strptime(
-                input, self.format
-            ).timestamp())
+            return str(datetime.strptime(input, self.format).timestamp())
         except Exception:
             return input
+
 
 class ParsedExecutionIdArn(Schema):
     def parse(self, input):
         try:
             if not isinstance(input, str):
                 return input
-            return input.split(':')[-1]
+            return input.split(":")[-1]
         except Exception:
             return input
+
 
 @dataclass
 class ParsedCLIArgument(Schema):

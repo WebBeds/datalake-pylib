@@ -1,47 +1,29 @@
-from datetime import datetime
-import logging
 import base64
-import signal 
-import socket
 import json
-import uuid
+import logging
+import signal
+import socket
 import sys
+import uuid
+from datetime import datetime
 
-from .args import (
-    parse_argv,
-    parse_os_args,
-    parse_config,
-    parse_cli,
-)
+from .actions import END, START, parse_actions
+from .args import parse_argv, parse_cli, parse_config, parse_os_args
+from .command import get_command
+from .metrics import SingleMetric, WrapperMetrics
+from .process import WrapperProcess
 
-from .command import (
-    get_command,
-)
-
-from .metrics import (
-    WrapperMetrics, 
-    SingleMetric,
-)
-
-from .process import (
-    WrapperProcess
-)
-
-from .actions import (
-    parse_actions,
-    START,
-    END
-)
 
 def get_dimensions(job: str, metrics: WrapperMetrics) -> dict:
     return {
-        'Team': metrics.team,
-        'Group': metrics.group,
-        'Job': job,
+        "Team": metrics.team,
+        "Group": metrics.group,
+        "Job": job,
     }
 
+
 def main() -> None:
-    
+
     # ************************
     # PARSE ARGV and OS ENV
     # ************************
@@ -60,7 +42,7 @@ def main() -> None:
     now = datetime.utcnow()
 
     logging.basicConfig(
-        format='%(asctime)s %(levelname)5s %(message)s',
+        format="%(asctime)s %(levelname)5s %(message)s",
         level=logging.DEBUG if args.debug else logging.INFO,
     )
 
@@ -76,31 +58,30 @@ def main() -> None:
     config = parse_config(
         config_path=args.config,
     )
-    cli = parse_cli(
-        cli_json=args.cli_json,
-        config=config
-    )
+    cli = parse_cli(cli_json=args.cli_json, config=config)
 
     logging.info("ARG: {0}".format(args))
     logging.info("CFG: {0}".format(config))
     logging.info("CLI: {0}".format(cli))
 
-    oenv.update({
-        "_execution": {
-            "config": config,
-            "cli": cli,
+    oenv.update(
+        {
+            "_execution": {
+                "config": config,
+                "cli": cli,
+            }
         }
-    })
+    )
 
     # ************************
     # METRICS
     # ************************
 
     metrics = WrapperMetrics(
-        namespace=config['metrics']['namespace'],
-        team=config['metrics']['team'],
-        group=cli['group'],
-        aws_region=config['metrics']['region']
+        namespace=config["metrics"]["namespace"],
+        team=config["metrics"]["team"],
+        group=cli["group"],
+        aws_region=config["metrics"]["region"],
     )
     logging.info("MTS: {0}".format(metrics))
 
@@ -108,17 +89,16 @@ def main() -> None:
     # ACTIONS
     # ************************
 
-    actions = parse_actions(
-        actions=cli['actions'],
-        oenv=oenv
-    )
+    actions = parse_actions(actions=cli["actions"], oenv=oenv)
     logging.info("ACT: {0}".format(actions))
 
-    metrics.add(SingleMetric(
-        metric_name='Start',
-        dimensions=get_dimensions(cli['job'], metrics),
-        value=1,
-    ))
+    metrics.add(
+        SingleMetric(
+            metric_name="Start",
+            dimensions=get_dimensions(cli["job"], metrics),
+            value=1,
+        )
+    )
     if not args.dry:
         _ = metrics.send()
 
@@ -127,33 +107,26 @@ def main() -> None:
     # ************************
 
     # NOTE: Execute start actions
-    actions.execute(
-        stage=START,
-        dry=args.dry
-    )
+    actions.execute(stage=START, dry=args.dry)
 
     # NOTE: Use OENV from actions for parsing the command
-    cmd = get_command(
-        entrypoint=cli["entrypoint"],
-        command=cli["command"],
-        oenv=actions.oenv
-    )
+    cmd = get_command(entrypoint=cli["entrypoint"], command=cli["command"], oenv=actions.oenv)
 
     logging.info("CMD: {0}".format(cmd))
 
     request = {
-        'uuid': str(request_uuid),
-        'host': socket.gethostname(),
-        'args': sys.argv,
-        'oenv': oenv,
-        'config': config,
-        'cli': cli,
-        'cmd': cmd,
-        'dry': args.dry,
-        'timestamp': now.isoformat()
+        "uuid": str(request_uuid),
+        "host": socket.gethostname(),
+        "args": sys.argv,
+        "oenv": oenv,
+        "config": config,
+        "cli": cli,
+        "cmd": cmd,
+        "dry": args.dry,
+        "timestamp": now.isoformat(),
     }
-    request_b64 = base64.b64encode(json.dumps(request).encode('utf-8'))
-    logging.info("REQ: {0}".format(request_b64.decode('utf-8')))
+    request_b64 = base64.b64encode(json.dumps(request).encode("utf-8"))
+    logging.info("REQ: {0}".format(request_b64.decode("utf-8")))
 
     # ************************
     # Wrapper Process
@@ -162,17 +135,16 @@ def main() -> None:
     proc = WrapperProcess(
         cmd=cmd,
         metrics=metrics,
-        rate=int(config['metrics']['rate']),
-        dimensions=get_dimensions(cli['job'], metrics)
+        rate=int(config["metrics"]["rate"]),
+        dimensions=get_dimensions(cli["job"], metrics),
+        timeout=int(config["wrapper"]["timeout"]),
     )
 
-    signals_to_handle = [
-        signal.SIGTERM
-    ]
-    for sig in signals_to_handle: 
+    signals_to_handle = [signal.SIGTERM]
+    for sig in signals_to_handle:
         signal.signal(sig, proc.signal_handler)
 
-    exit_code, duration, p = proc.run(dry=args.dry, retries=cli['retries'])
+    exit_code, duration, p = proc.run(dry=args.dry, retries=cli["retries"])
 
     # NOTE: Get StdOut and StdErr
     stdout: str = None
@@ -203,45 +175,42 @@ def main() -> None:
     # NOTE: Send metrics about the process
     metrics.add(
         SingleMetric(
-            metric_name='Duration',
-            dimensions=get_dimensions(cli['job'], metrics),
+            metric_name="Duration",
+            dimensions=get_dimensions(cli["job"], metrics),
             value=int(round(duration, 0)),
-            unit='Seconds',
+            unit="Seconds",
         ),
         SingleMetric(
-            metric_name='Exit',
-            dimensions=get_dimensions(cli['job'], metrics),
+            metric_name="Exit",
+            dimensions=get_dimensions(cli["job"], metrics),
             value=0 if exit_code == 0 else 1,
         ),
         SingleMetric(
-            metric_name='Exit',
-            dimensions={
-                'Team': metrics.team
-            },
+            metric_name="Exit",
+            dimensions={"Team": metrics.team},
             value=0 if exit_code == 0 else 1,
         ),
         SingleMetric(
-            metric_name='End',
-            dimensions=get_dimensions(cli['job'], metrics),
+            metric_name="End",
+            dimensions=get_dimensions(cli["job"], metrics),
             value=1,
-        )
+        ),
     )
 
     if not args.dry:
         _ = metrics.send()
 
     # NOTE: Update oenv with process data.
-    actions.oenv.update({
-        'ExitCode': exit_code,
-        'Duration': int(round(duration, 0)),
-        'StdOut': stdout,
-        'StdErr': stderr,
-    })
-
-    actions.execute(
-        stage=END,
-        dry=args.dry
+    actions.oenv.update(
+        {
+            "ExitCode": exit_code,
+            "Duration": int(round(duration, 0)),
+            "StdOut": stdout,
+            "StdErr": stderr,
+        }
     )
+
+    actions.execute(stage=END, dry=args.dry)
 
     # NOTE: Return exit code to caller
     exit(exit_code)

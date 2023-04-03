@@ -1,22 +1,31 @@
-import sys
-from .metrics import WrapperMetrics, SingleMetric
-from threading import Event, Thread
-from subprocess import Popen, PIPE
-
-import signal as sg
 import logging
+import signal as sg
+import sys
 import time
+from subprocess import PIPE, Popen, TimeoutExpired
+from threading import Event, Thread
 
-DEFAULT_STOP_TIMEOUT = 120 # 2 minutes
+from .metrics import SingleMetric, WrapperMetrics
+
+DEFAULT_STOP_TIMEOUT = 120  # 2 minutes
+
 
 class WrapperProcess:
-    e: Event # Event for threads
-    mt: Thread = None # Metrics Thread
+    e: Event  # Event for threads
+    mt: Thread = None  # Metrics Thread
 
-    p: Popen = None # Process
-    mp: Thread = None# Process Thread for handle signals
+    p: Popen = None  # Process
+    mp: Thread = None  # Process Thread for handle signals
 
-    def __init__(self, cmd: list, metrics: WrapperMetrics, rate: int, timeout: int = None, stop_timeout: int = DEFAULT_STOP_TIMEOUT, dimensions: dict = None) -> None:
+    def __init__(
+        self,
+        cmd: list,
+        metrics: WrapperMetrics,
+        rate: int,
+        timeout: int = None,
+        stop_timeout: int = DEFAULT_STOP_TIMEOUT,
+        dimensions: dict = None,
+    ) -> None:
         self.cmd = cmd
         self.metrics = metrics
         self.rate = rate
@@ -34,11 +43,11 @@ class WrapperProcess:
                 time.sleep(1)
                 continue
             m = SingleMetric(
-                metric_name='Duration',
+                metric_name="Duration",
                 dimensions=self.dimensions,
                 value=int(round(time.time() - start, 0)),
             )
-            logging.debug('Adding rate metric: {0}'.format(m.to_cloudwatch_metric()))
+            logging.debug("Adding rate metric: {0}".format(m.to_cloudwatch_metric()))
             self.metrics.add(m)
             if not dry:
                 _ = self.metrics.send()
@@ -59,27 +68,27 @@ class WrapperProcess:
                 time.sleep(0.5)
 
     def signal_handler(self, signal, frame) -> None:
-        logging.debug('Received signal: {}'.format(signal))
+        logging.debug("Received signal: {}".format(signal))
 
         if signal == sg.SIGTERM and self.p:
-            logging.debug('Sending SIGTERM to process')
+            logging.debug("Sending SIGTERM to process")
             self.p.send_signal(sg.SIGTERM)
             try:
                 self.p.wait(timeout=self.stop_timeout)
             except Exception as e:
-                logging.warning('Process did not stop within {} seconds'.format(self.stop_timeout))
+                logging.warning("Process did not stop within {} seconds".format(self.stop_timeout))
                 self.p.send_signal(sg.SIGKILL)
             self.e.set()
             return
 
         if signal == sg.SIGKILL and self.p:
-            logging.debug('Sending SIGKILL to process')
+            logging.debug("Sending SIGKILL to process")
             self.e.set()
             self.p.send_signal(sg.SIGKILL)
             try:
                 self.p.wait(timeout=self.stop_timeout)
             except Exception as e:
-                logging.warning('Process did not stop within {} seconds'.format(self.stop_timeout))
+                logging.warning("Process did not stop within {} seconds".format(self.stop_timeout))
             return
 
         if signal == sg.SIGTERM and not self.p:
@@ -93,12 +102,7 @@ class WrapperProcess:
         start = time.time()
 
         try:
-            self.p = Popen(
-                args=self.cmd,
-                stdout=PIPE,
-                stderr=PIPE,
-                universal_newlines=True
-            )
+            self.p = Popen(args=self.cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
         except:
             end = time.time()
             self.e.set()
@@ -109,14 +113,19 @@ class WrapperProcess:
             target=self.stdout_consumer,
         ).start()
 
-        exit_code = self.p.wait(timeout=self.timeout)
+        try:
+            exit_code = self.p.wait(timeout=self.timeout)
+        except TimeoutExpired:
+            self.signal_handler(sg.SIGTERM, None)
+            exit_code = 1
+
         self.e.set()
         end = time.time()
 
         return exit_code, (end - start), self.p
 
     def run(self, dry: bool = False, retries: int = None):
-        
+
         if not retries or (retries and retries < 1):
             return self._run_process()
 
@@ -125,7 +134,7 @@ class WrapperProcess:
             return exit_code, duration, p
 
         for retry in range(retries):
-            
+
             exit_code, duration, p = self._run_process()
             if exit_code == 0:
                 return exit_code, duration, p
@@ -137,24 +146,20 @@ class WrapperProcess:
                 stderr = p.stderr.read() if p else None
             except:
                 pass
-        
+
             try:
                 stdout = p.stdout.read() if p else None
             except:
                 pass
 
-            logging.error("{}{}ERR: ".format(
-                f"RETRY {retry + 1}",
-                "\t" * 2,
-                stderr
-            )) if stderr else None
+            logging.error(
+                "{}{}ERR: ".format(f"RETRY {retry + 1}", "\t" * 2, stderr)
+            ) if stderr else None
 
-            logging.error("{}{}OUT: ".format(
-                f"RETRY {retry + 1}",
-                "\t" * 2,
-                stdout
-            )) if stdout else None
+            logging.error(
+                "{}{}OUT: ".format(f"RETRY {retry + 1}", "\t" * 2, stdout)
+            ) if stdout else None
 
             retries -= 1
-        
+
         return exit_code, duration, p

@@ -1,20 +1,20 @@
-from ..command import parse_command
-from dataclasses import dataclass
-from .actions import (
-    Action
-)
-
-import tempfile
 import logging
-import boto3
-import time
 import os
+import tempfile
+import time
+from dataclasses import dataclass
+
+import boto3
+
+from ..command import parse_command
+from .actions import Action
 
 DEFAULT_AWS_REGION = "eu-west-1"
 AVAILABLE_MODES = [
     "GET",
     "PUT",
 ]
+
 
 @dataclass
 class S3(Action):
@@ -29,14 +29,9 @@ class S3(Action):
 
     def _get_session(self, oenv: dict) -> boto3.Session:
         if self.profile:
-            return boto3.Session(
-                region_name=self.region,
-                profile_name=self.profile
-            )
+            return boto3.Session(region_name=self.region, profile_name=self.profile)
         else:
-            return boto3.Session(
-                region_name=self.region
-            )
+            return boto3.Session(region_name=self.region)
 
     def _get(self, svc, oenv: dict) -> None:
         output: str = self.output
@@ -54,16 +49,12 @@ class S3(Action):
             except:
                 pass
             with tempfile.NamedTemporaryFile(
-                    delete=delete,
-                    mode="wb",
-                    suffix=f".{suffix}" if suffix else None
-                ) as f:
+                delete=delete, mode="wb", suffix=f".{suffix}" if suffix else None
+            ) as f:
                 svc.download_fileobj(self.bucket, self.key, f)
                 output = f.name
-        
-        oenv.update({
-            "S3_GET_OUTPUT": output
-        })
+
+        oenv.update({"S3_GET_OUTPUT": output})
 
     def _put(self, svc, oenv: dict) -> None:
         raise NotImplementedError("PUT is not implemented yet.")
@@ -103,13 +94,13 @@ class S3(Action):
         profile: str = None
         region: str = DEFAULT_AWS_REGION
         output: str = None
-        mode: str = "GET" # Default to GET
+        mode: str = "GET"  # Default to GET
 
         stage, action, condition = Action._parse_default_attr(data)
 
         if "bucket" not in data and "key" not in data:
             raise ValueError("The data must contain the bucket and key.")
-        
+
         bucket = data["bucket"]
         key = data["key"]
 
@@ -133,5 +124,5 @@ class S3(Action):
             profile=profile,
             region=region,
             output=output,
-            mode=mode
+            mode=mode,
         )

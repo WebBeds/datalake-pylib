@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import Any
 
+
 class Schema:
     def parse(self, input):
         return input
+
 
 @dataclass
 class Argument:
@@ -14,7 +16,7 @@ class Argument:
 
     def parse(self, input) -> Any:
         try:
-            if not input: 
+            if not input:
                 return self.schema.parse(self.default)
             if self.key in input:
                 return self.schema.parse(input[self.key])

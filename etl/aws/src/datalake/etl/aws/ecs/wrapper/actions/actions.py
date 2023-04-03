@@ -1,10 +1,12 @@
-from ..command import parse_command
-from dataclasses import dataclass
-from abc import abstractmethod
 import logging
+from abc import abstractmethod
+from dataclasses import dataclass
+
+from ..command import parse_command
 
 START = "start"
 END = "end"
+
 
 @dataclass
 class Action:
@@ -68,9 +70,8 @@ class Action:
         :param data: The data to parse.
         :return: The action instance.
         """
-        return Action(
-            **data
-        )
+        return Action(**data)
+
 
 @dataclass
 class WrapperActions:
@@ -94,10 +95,7 @@ class WrapperActions:
                 continue
             try:
                 logging.debug("Executing action: {0}".format(action.action))
-                action.execute(
-                    oenv=self.oenv,
-                    dry=dry
-                )
+                action.execute(oenv=self.oenv, dry=dry)
             except Exception as e:
                 logging.error("Failed to execute action: {0}".format(action))
                 logging.error(e)
