@@ -2,11 +2,6 @@
 # AWS MODULE OF ETL         #
 # ========================= #
 
-__version__ = "0.6"
+__version__ = "0.7"
 
-from . import (
-    awslambda,
-    secretsmanager,
-    ecs,
-    cloudwatch
-)
+from . import awslambda, cloudwatch, ecs, secretsmanager

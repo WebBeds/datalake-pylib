@@ -13,7 +13,6 @@ from .actions import Action
 
 @dataclass
 class SNSECSErrorTrace(Action):
-
     topic: str
 
     name: str
@@ -22,7 +21,6 @@ class SNSECSErrorTrace(Action):
     level: str = "ERROR"
 
     def obtain_context(self, oenv: dict):
-
         self.topic = parse_command(self.topic, oenv)
 
         cli: dict = oenv.get("_execution", {}).get("cli", {})
@@ -32,7 +30,6 @@ class SNSECSErrorTrace(Action):
             self.subject = cli.get("job", None)
 
     def obtain_logstream(self) -> str:
-
         metadata_url: str = os.environ.get("ECS_CONTAINER_METADATA_URI_V4", None)
         if not metadata_url:
             raise ValueError("The ECS_CONTAINER_METADATA_URI_V4 is not set.")
@@ -58,11 +55,12 @@ class SNSECSErrorTrace(Action):
         return log_url
 
     def obtain_message(self, oenv: dict) -> str:
-
         # Obtain StdErr
         stderr = oenv.get("StdErr", None)
         if not stderr:
-            raise ValueError("The StdErr is empty.")
+            return base64.b64encode(
+                "StdErr is empty, maybe is from OutOfMemory error.".encode("utf-8")
+            ).decode("utf-8")
 
         # Obtain the last 10 lines of the StdErr
         stderr = stderr.splitlines()[-10:]
@@ -104,7 +102,6 @@ class SNSECSErrorTrace(Action):
 
     @staticmethod
     def parse(data: dict):
-
         stage, action, condition = Action._parse_default_attr(data)
 
         if not data.get("topic"):
