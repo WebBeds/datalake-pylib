@@ -63,7 +63,7 @@ class PGLock(contextlib.ContextDecorator):
         self,
         lock_id: str,
         conn: pg8000.Connection,
-        timeout: int = None,
+        timeout: int = 120,  # 120 seconds by default (2 minutes)
     ) -> None:
         self.lock_id = _cast_lock_id(lock_id)
         self.conn = conn
@@ -87,7 +87,10 @@ class PGLock(contextlib.ContextDecorator):
                     cursor.execute(sql, (self.lock_id,))
                     self.acquired = True
                     if not self.wait:
-                        self.acquired = cursor.fetchone()[0]
+                        try:
+                            self.acquired = cursor.fetchone()[0]
+                        except:
+                            self.acquired = False
         except pg8000.ProgrammingError:
             raise TimeoutError("Timeout while acquiring lock") from None
         except Exception:
