@@ -14,6 +14,7 @@ from .actions import Action
 @dataclass
 class SNSECSErrorTrace(Action):
     topic: str
+    webhook: str
 
     name: str
     subject: str
@@ -22,6 +23,8 @@ class SNSECSErrorTrace(Action):
 
     def obtain_context(self, oenv: dict):
         self.topic = parse_command(self.topic, oenv)
+        if self.webhook:
+            self.webhook = parse_command(self.webhook, oenv)
 
         cli: dict = oenv.get("_execution", {}).get("cli", {})
         if not self.name:
@@ -96,6 +99,7 @@ class SNSECSErrorTrace(Action):
                     "message": message,
                     "link": logs_url,
                     "level": self.level,
+                    "webhook": self.webhook,
                 }
             ),
         )
@@ -109,6 +113,7 @@ class SNSECSErrorTrace(Action):
 
         name: str = data.get("name", None)
         subject: str = data.get("subject", None)
+        webhook: str = data.get("webhook", None)
 
         return SNSECSErrorTrace(
             stage=stage,
@@ -117,4 +122,5 @@ class SNSECSErrorTrace(Action):
             topic=data.get("topic"),
             name=name,
             subject=subject,
+            webhook=webhook,
         )
