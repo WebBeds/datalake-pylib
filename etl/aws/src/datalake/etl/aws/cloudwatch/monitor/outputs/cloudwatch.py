@@ -1,16 +1,17 @@
-from ....ecs.wrapper.metrics import SingleMetric
-from ..metrics import MonitorMetrics
+import logging
 from dataclasses import dataclass
-from .output import Output
 
 import pandas as pd
-import logging
+
+from ....ecs.wrapper.metrics import SingleMetric
+from ..metrics import MonitorMetrics
+from .output import Output
 
 DEFAULT_UNITS = "Seconds"
 
+
 @dataclass
 class CloudWatch(Output):
-
     name: str
     dimensions: dict
     unit: str
@@ -18,19 +19,13 @@ class CloudWatch(Output):
     namespace: str
     region: str
 
-    def _process_dimensions(
-        self,
-        dimension,
-        default,
-        input
-    ):
+    def _process_dimensions(self, dimension, default, input):
         if str(dimension).lower() in input:
             return str(input[str(dimension).lower()])
         else:
             return default
 
     def send(self, df: pd.DataFrame) -> None:
-
         metrics = MonitorMetrics(
             namespace=self.namespace,
             aws_region=self.region,
@@ -40,23 +35,18 @@ class CloudWatch(Output):
             m = SingleMetric(
                 metric_name=self.name,
                 dimensions={
-                    k: self._process_dimensions(
-                        k,
-                        v,
-                        row
-                    ) for k, v in self.dimensions.items()
+                    k: self._process_dimensions(k, v, row) for k, v in self.dimensions.items()
                 },
                 value=row[self.name.lower()],
-                unit=self.unit
+                unit=self.unit,
             )
-            logging.info(m.to_cloudwatch_metric())
+            logging.debug(m.to_cloudwatch_metric())
             metrics.add(m)
 
         metrics.send()
 
     @staticmethod
     def parse(data: dict):
-
         name: str = None
         dimensions: dict = None
         unit: str = None
@@ -64,7 +54,7 @@ class CloudWatch(Output):
         original_src: dict = data.get("src", None)
         if not original_src:
             raise ValueError("Source must have src")
-        
+
         # Check original source
         name = original_src.get("name", None)
         dimensions = original_src.get("dimensions", None)
@@ -84,7 +74,7 @@ class CloudWatch(Output):
             unit = DEFAULT_UNITS
 
         region: str = data.get("options", {}).get("region", "eu-west-1")
-        
+
         return CloudWatch(
             name=name,
             dimensions=dimensions,
