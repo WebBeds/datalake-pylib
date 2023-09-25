@@ -14,6 +14,8 @@ class CloudWatch(Source):
     namespace: str
     offset: int
     statistic: str
+    include: typing.List[dict]
+    exclude: typing.List[dict]
 
     name: str
     dimensions: dict
@@ -55,9 +57,28 @@ class CloudWatch(Source):
         except:
             return [self.dimensions]
 
+    def filter_dimensions(self, dims: typing.List[dict]) -> typing.List[dict]:
+        if not self.include and not self.exclude:
+            return dims
+        if self.exclude:
+            dims = [
+                dim
+                for dim in dims
+                for excluded in self.exclude
+                if any([dim.get(k) != v for k, v in excluded.items()])
+            ]
+        if self.include:
+            dims = [
+                dim
+                for dim in dims
+                for included in self.include
+                if any([dim.get(k) == v for k, v in included.items()])
+            ]
+        return dims
+
     def retrieve(self, query: str) -> pd.DataFrame:
         out = []
-        dims = self.get_dimensions()
+        dims = self.filter_dimensions(self.get_dimensions())
         svc = self._boto3_session.client("cloudwatch")
         for metric in dims:
             try:
@@ -93,6 +114,8 @@ class CloudWatch(Source):
     def parse(data: dict) -> "CloudWatch":
         offset = 60
         statistic = "Sum"
+        include = []
+        exclude = []
 
         options: dict = data.get("options", {})
         ori_src: dict = data.get("src", {})
@@ -106,6 +129,12 @@ class CloudWatch(Source):
         unit = ori_src.get("unit", "Count")
 
         try:
+            include = options.get("include", include)
+            exclude = options.get("exclude", exclude)
+        except ValueError:
+            pass
+
+        try:
             statistic = options.get("statistic", statistic)
             offset = int(options.get("offset", offset))
         except ValueError:
@@ -115,6 +144,8 @@ class CloudWatch(Source):
             namespace=namespace,
             offset=offset,
             statistic=statistic,
+            include=include,
+            exclude=exclude,
             name=name,
             dimensions=dimensions,
             unit=unit,
