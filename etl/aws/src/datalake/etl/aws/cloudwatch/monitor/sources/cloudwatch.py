@@ -61,12 +61,10 @@ class CloudWatch(Source):
         if not self.include and not self.exclude:
             return dims
         if self.exclude:
-            dims = [
-                dim
-                for dim in dims
-                for excluded in self.exclude
-                if any([dim.get(k) != v for k, v in excluded.items()])
-            ]
+            for exclude in self.exclude:
+                dims = [
+                    dim for dim in dims if not any([dim.get(k) == v for k, v in exclude.items()])
+                ]
         if self.include:
             dims = [
                 dim
