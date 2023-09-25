@@ -1,69 +1,63 @@
-from ._commands import parse_command
+import io
 from dataclasses import dataclass
-from .output import Output
 
 import awswrangler as wr
 import pandas as pd
 import requests
-import io
+
+from ._commands import parse_command
+from .output import Output
+
 
 @dataclass
 class Teams(Output):
-
     name: str
     dimensions: dict
     webhook: str
     condition: list
-    
+
     title: str
     description: str = None
 
-    def _process_dimensions(
-        self,
-        dimension,
-        default,
-        input
-    ):
+    def _process_dimensions(self, dimension, default, input):
         if str(dimension).lower() in input:
             return str(input[str(dimension).lower()])
         else:
             return default
 
     def send(self, df: pd.DataFrame) -> None:
-
+        out = []
         not_meet: bool = False
+        not_meet_eval: str = ""
         for _, row in df.iterrows():
-
             value = row[self.name.lower()]
-
-            to_eval = [
-                str(value),
-                *self.condition
-            ]
-
+            to_eval = [str(value), *self.condition]
             try:
                 if eval(" ".join(to_eval)):
                     print("Condition met, skipping")
-                    continue 
+                    continue
             except:
                 print("Error evaluating condition")
                 continue
-
+            # NOTE: Only send the rows that do not meet the condition
+            out.append(row)
+            # NOTE: Send the last row that did not meet the condition
+            not_meet_eval = " ".join(to_eval)
             not_meet = True
-        
+
         if not not_meet:
             return
 
         # DF to Markdown and store in string variable
         buff = io.StringIO()
-        df.to_html(buf=buff, index=False)
+        pd.DataFrame(out).to_html(buf=buff, index=False)
         buff.seek(0)
 
         # Using HTML
         text: str = "<h2>Condition not met</h2><p>{}</p>{}<br/><h2>DataFrame</h2>{}".format(
-            " ".join(to_eval),
+            not_meet_eval,
             f"<h2>Description:</h2><p>{self.description}</p>" if self.description else "",
-            buff.read()
+            buff.read(),
         )
 
         # Send POST request to webhook
@@ -73,18 +67,16 @@ class Teams(Output):
             "themeColor": "d63333",
             "summary": f"Alarm - There is an issue with {self.title}",
             "title": f"Alarm - There is an issue with {self.title}",
-            "text": text
+            "text": text,
         }
 
-        requests.post(
-            url=self.webhook,
-            json=message
-        )
+        requests.post(url=self.webhook, json=message)
 
     @staticmethod
     def parse(data: dict):
-        
-        webhook: str = parse_command(data.get("options", {}).get("webhook", None), data.get("src", {}))
+        webhook: str = parse_command(
+            data.get("options", {}).get("webhook", None), data.get("src", {})
+        )
 
         name: str = data.get("src", {}).get("name", None)
         if not name:
@@ -103,7 +95,7 @@ class Teams(Output):
         title: str = data.get("options", {}).get("title", None)
         if not title:
             raise ValueError("Title must be provided")
-        
+
         description: str = data.get("options", {}).get("description", None)
 
         return Teams(
@@ -112,5 +104,5 @@ class Teams(Output):
             dimensions=dimensions,
             condition=condition,
             title=title,
-            description=description
+            description=description,
         )

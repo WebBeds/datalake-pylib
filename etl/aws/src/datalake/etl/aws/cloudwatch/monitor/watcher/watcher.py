@@ -1,27 +1,21 @@
+import logging
 from dataclasses import dataclass
 from datetime import datetime
+
 from croniter import croniter
 
-from ..outputs import (
-    Output,
-    CloudWatch,
-    Teams,
-)
-from ..sources import (
-    Source,
-    Athena,
-    Postgres,
-)
+from ..outputs import CloudWatch, Output, Teams
+from ..sources import Athena
+from ..sources import CloudWatch as CloudWatchSource
+from ..sources import Postgres, Source
 
-import logging
-
-DEFAULT_VALUE = 7 * 24 * 60 * 60 # 7 days
+DEFAULT_VALUE = 7 * 24 * 60 * 60  # 7 days
 DEFAULT_SOURCE = "athena"
 DEFAULT_OUTPUT = "cloudwatch"
 
+
 @dataclass
 class Watcher:
-
     name: str
     sql: str
 
@@ -33,21 +27,18 @@ class Watcher:
 
     def validate_cron(self, now: datetime) -> bool:
         if not self.cron_expression or not now:
-            return True        
+            return True
         return croniter.match(
             self.cron_expression,
             now,
         )
 
     def run(self, dry: bool = False, now: datetime = None) -> None:
-
         if not self.validate_cron(now):
             logging.info(f"Watcher `{self.name}` skipped due to cron expression")
             return
 
-        df = self.source.retrieve(
-            query=self.sql
-        )
+        df = self.source.retrieve(query=self.sql)
         df.columns = df.columns.str.lower()
 
         if df.empty:
@@ -70,9 +61,7 @@ class Watcher:
 
     @staticmethod
     def parse(data: dict):
-
-        if not "name" in data \
-        or not "sql" in data:
+        if not "name" in data or not "sql" in data:
             raise ValueError("Watcher must have name, dimensions, unit and sql")
 
         name: str = data.get("name")
@@ -103,6 +92,8 @@ class Watcher:
             source = Athena.parse(source)
         elif source["type"] == "postgres":
             source = Postgres.parse(source)
+        elif source["type"] == "cloudwatch":
+            source = CloudWatchSource.parse(source)
         else:
             raise ValueError("Source not supported")
 
