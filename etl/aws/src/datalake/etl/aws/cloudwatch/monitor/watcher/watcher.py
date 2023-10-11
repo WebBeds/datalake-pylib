@@ -7,7 +7,7 @@ from croniter import croniter
 from ..outputs import CloudWatch, Output, Teams
 from ..sources import Athena
 from ..sources import CloudWatch as CloudWatchSource
-from ..sources import Postgres, Source
+from ..sources import Postgres, Source, SQLServer
 
 DEFAULT_VALUE = 7 * 24 * 60 * 60  # 7 days
 DEFAULT_SOURCE = "athena"
@@ -94,6 +94,8 @@ class Watcher:
             source = Postgres.parse(source)
         elif source["type"] == "cloudwatch":
             source = CloudWatchSource.parse(source)
+        elif source["type"] == "sqlserver":
+            source = SQLServer.parse(source)
         else:
             raise ValueError("Source not supported")
 
