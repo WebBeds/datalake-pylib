@@ -59,6 +59,6 @@ setup(
     install_requires=[
         "pandas>=1.2.4",
         "numpy>=1.21.0",
-        "awswrangler[postgres,sqlserver]>=2.20.0",
+        "awswrangler[postgres]>=2.20.0",
     ],
 )
