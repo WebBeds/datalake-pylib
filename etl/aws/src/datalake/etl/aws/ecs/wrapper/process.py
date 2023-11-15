@@ -67,6 +67,20 @@ class WrapperProcess:
             finally:
                 time.sleep(0.5)
 
+    def stderr_consumer(self) -> None:
+        # Consume stderr
+        while not self.e.is_set():
+            try:
+                if not self.p or not self.p.stderr or self.p.stderr.closed:
+                    break
+                line = self.p.stderr.readline()
+                if line:
+                    logging.debug(f"ERR: {line.strip()}")
+            except:
+                pass
+            finally:
+                time.sleep(0.5)
+
     def signal_handler(self, signal, frame) -> None:
         logging.debug("Received signal: {}".format(signal))
 
@@ -98,7 +112,6 @@ class WrapperProcess:
         return self.p.send_signal(signal) if self.p else None
 
     def _run_process(self):
-
         start = time.time()
 
         try:
@@ -108,9 +121,12 @@ class WrapperProcess:
             self.e.set()
             return 1, (end - start), None
 
-        # NOTE: Start STDOUT consumer.
         Thread(
             target=self.stdout_consumer,
+        ).start()
+
+        Thread(
+            target=self.stderr_consumer,
         ).start()
 
         try:
@@ -125,7 +141,6 @@ class WrapperProcess:
         return exit_code, (end - start), self.p
 
     def run(self, dry: bool = False, retries: int = None):
-
         if not retries or (retries and retries < 1):
             return self._run_process()
 
@@ -134,7 +149,6 @@ class WrapperProcess:
             return exit_code, duration, p
 
         for retry in range(retries):
-
             exit_code, duration, p = self._run_process()
             if exit_code == 0:
                 return exit_code, duration, p
