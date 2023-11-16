@@ -20,7 +20,10 @@ def normalize_df(df: DataFrame, schema, verbose=False, force=False, lower=False)
         if t is None:
             # print(f"WARNING: {c} not in schema")
             continue
-        df[c] = t.format(df[c])
+        try:
+            df[c] = t.format(df[c])
+        except Exception as e:
+            raise Exception(f"Failed to format column {c} as {t}") from e
 
     if verbose:
         print(df.dtypes)

@@ -69,9 +69,9 @@ class Bool:
 
     def format(self, s: pd.Series) -> pd.Series:
         if self.text:
-            s = s.fillna(0).apply(lambda x: True if x == "true" else False)
+            s = s.fillna(False).apply(lambda x: True if x == "true" else False)
         else:
-            s = s.fillna(0).apply(lambda x: bool(int(x)))
+            s = s.fillna(False).apply(lambda x: bool(int(x)))
 
         return s
 
