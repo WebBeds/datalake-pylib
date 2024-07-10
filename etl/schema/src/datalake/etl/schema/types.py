@@ -32,7 +32,7 @@ class Str:
     def format(self, s: pd.Series) -> pd.Series:
         s = s.astype(str).fillna("")
         if self.clean:
-            s = s.str.replace(re.compile(r"^(None|nan|0| +)$"), "", regex=True)
+            s = s.str.replace(re.compile(r"^(None|nan|0|<NA>| +)$"), "", regex=True)
             # s = s.map(lambda x: None if x in ('None', 'nan', '0') else x)
         if self.length > 0:
             s = s.str.slice(0, self.length)
@@ -113,9 +113,11 @@ class Time:
         if self.utc and str(s.dtypes) != str(pd.DatetimeTZDtype(tz="UTC")):
             print(f"WARNING: time was not in UTC {s.dtypes}")
             s = s.map(
-                lambda x: x
-                if x.tzinfo is not None
-                else pd.to_datetime(x, unit=self.unit).tz_localize("UTC")
+                lambda x: (
+                    x
+                    if x.tzinfo is not None
+                    else pd.to_datetime(x, unit=self.unit).tz_localize("UTC")
+                )
             )
         return s
 
